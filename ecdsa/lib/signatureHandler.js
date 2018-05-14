@@ -1,8 +1,8 @@
 
 const crypto = require('crypto');
-const ssutil = require("./ssutil");
-const KeyEncoder = require("../../ecdsa/lib/keyEncoder")
-const spv = require("./signaturePersistence").getSPV();
+const ssutil = require("../../ssutil");
+const KeyEncoder = require("./keyEncoder")
+const spv = require("../../tests/fakes/signaturePersistence").getSPV();
 
 
 

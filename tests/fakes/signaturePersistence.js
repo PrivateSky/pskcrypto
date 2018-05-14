@@ -1,5 +1,5 @@
 const safebox = require("./safebox").getSafebox();
-const pds = require("./pds").getPDS();
+const pds = require("./PDS").getPDS();
 
 
 function SignaturePersistenceProvider(){

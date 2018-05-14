@@ -1,5 +1,5 @@
 
-var ss = require("../signatureHandler");
+var ss = require("../ecdsa/lib/signatureHandler");
 
 require("../../../engine/core").enableTesting();
 

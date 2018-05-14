@@ -1,6 +1,6 @@
 var Reporter = require('../base').Reporter;
 var EncoderBuffer = require('../base').EncoderBuffer;
-var assert = require('minimalistic-assert');
+var assert = require('double-check').assert;
 
 // Supported tags
 var tags = [
@@ -87,7 +87,7 @@ Node.prototype._wrap = function wrap() {
 Node.prototype._init = function init(body) {
   var state = this._baseState;
 
-  assert(state.parent === null);
+  assert.equal(state.parent,null,'state.parent should be null');
   body.call(this);
 
   // Filter children
@@ -109,7 +109,7 @@ Node.prototype._useArgs = function useArgs(args) {
   }, this);
 
   if (children.length !== 0) {
-    assert(state.children === null);
+    assert.equal(state.children, null, 'state.children should be null');
     state.children = children;
 
     // Replace parent to maintain backward link
@@ -118,7 +118,7 @@ Node.prototype._useArgs = function useArgs(args) {
     }, this);
   }
   if (args.length !== 0) {
-    assert(state.args === null);
+    assert.equal(state.args, null, 'state.args should be null');
     state.args = args;
     state.reverseArgs = args.map(function(arg) {
       if (typeof arg !== 'object' || arg.constructor !== Object)
@@ -156,7 +156,7 @@ tags.forEach(function(tag) {
     var state = this._baseState;
     var args = Array.prototype.slice.call(arguments);
 
-    assert(state.tag === null);
+    assert.equal(state.tag, null, 'state.tag should be null');
     state.tag = tag;
 
     this._useArgs(args);
@@ -168,7 +168,7 @@ tags.forEach(function(tag) {
 Node.prototype.use = function use(item) {
   var state = this._baseState;
 
-  assert(state.use === null);
+  assert.equal(state.use, null, 'state.use should be null');
   state.use = item;
 
   return this;
@@ -185,7 +185,7 @@ Node.prototype.optional = function optional() {
 Node.prototype.def = function def(val) {
   var state = this._baseState;
 
-  assert(state['default'] === null);
+  assert.equal(state['default'], null, "state['default'] should be null");
   state['default'] = val;
   state.optional = true;
 
@@ -195,7 +195,9 @@ Node.prototype.def = function def(val) {
 Node.prototype.explicit = function explicit(num) {
   var state = this._baseState;
 
-  assert(state.explicit === null && state.implicit === null);
+  assert.equal(state.explicit,null, 'state.explicit should be null');
+  assert.equal(state.implicit,null, 'state.implicit should be null');
+
   state.explicit = num;
 
   return this;
@@ -204,8 +206,10 @@ Node.prototype.explicit = function explicit(num) {
 Node.prototype.implicit = function implicit(num) {
   var state = this._baseState;
 
-  assert(state.explicit === null && state.implicit === null);
-  state.implicit = num;
+    assert.equal(state.explicit,null, 'state.explicit should be null');
+    assert.equal(state.implicit,null, 'state.implicit should be null');
+
+    state.implicit = num;
 
   return this;
 };
@@ -225,7 +229,7 @@ Node.prototype.obj = function obj() {
 Node.prototype.key = function key(newKey) {
   var state = this._baseState;
 
-  assert(state.key === null);
+  assert.equal(state.key, null, 'state.key should be null');
   state.key = newKey;
 
   return this;
@@ -242,7 +246,7 @@ Node.prototype.any = function any() {
 Node.prototype.choice = function choice(obj) {
   var state = this._baseState;
 
-  assert(state.choice === null);
+  assert.equal(state.choice, null,'state.choice should be null');
   state.choice = obj;
   this._useArgs(Object.keys(obj).map(function(key) {
     return obj[key];
@@ -402,7 +406,7 @@ Node.prototype._getUse = function _getUse(entity, obj) {
   var state = this._baseState;
   // Create altered use decoder if implicit is set
   state.useDecoder = this._use(entity, obj);
-  assert(state.useDecoder._baseState.parent === null);
+  assert.equal(state.useDecoder._baseState.parent, null, 'state.useDecoder._baseState.parent should be null');
   state.useDecoder = state.useDecoder._baseState.children[0];
   if (state.implicit !== state.useDecoder._baseState.implicit) {
     state.useDecoder = state.useDecoder.clone();
@@ -565,12 +569,12 @@ Node.prototype._encodeChoice = function encodeChoice(data, reporter) {
   var state = this._baseState;
 
   var node = state.choice[data.type];
-  if (!node) {
-    assert(
-        false,
-        data.type + ' not found in ' +
-            JSON.stringify(Object.keys(state.choice)));
-  }
+  // if (!node) {
+  //   assert(
+  //       false,
+  //       data.type + ' not found in ' +
+  //           JSON.stringify(Object.keys(state.choice)));
+  // }
   return node._encode(data.value, reporter);
 };
 

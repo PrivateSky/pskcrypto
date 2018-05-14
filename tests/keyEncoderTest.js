@@ -1,7 +1,8 @@
-var KeyEncoder = require('../../modules/ecdsa/lib/keyEncoder');
+var KeyEncoder = require('../ecdsa/lib/keyEncoder');
 var ECPrivateKeyASN = KeyEncoder.ECPrivateKeyASN;
 var SubjectPublicKeyInfoASN = KeyEncoder.SubjectPublicKeyInfoASN;
 
+var assert = require('double-check').assert;
 const crypto = require('crypto');
 const sign = crypto.createSign('sha256');
 const verify = crypto.createVerify('sha256');
@@ -21,9 +22,6 @@ var publicKey = aliceKey;
 var privateKeyObject = keyEncoder.privateKeyObject(privateKey,publicKey);
 
 var privateKeyPEM = ECPrivateKeyASN.encode(privateKeyObject, 'pem', privateKeyObject.pemOptions)
-console.log(privateKeyPEM);
-
-
 
 
 
@@ -35,9 +33,8 @@ var publicKeyPEM = SubjectPublicKeyInfoASN.encode(publicKeyObject, 'pem', public
 
 const signature = sign.sign(privateKeyPEM,'hex');
 
-
+assert.notEqual(signature, null, 'signature is null');
 
 verify.update('some data to sign');
-console.log(signature);
 
-console.log(verify.verify(publicKeyPEM,signature,'hex'));
+assert.equal(verify.verify(publicKeyPEM,signature,'hex'),true,'Fail to verify signature');

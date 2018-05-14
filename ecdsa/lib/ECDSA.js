@@ -1,9 +1,3 @@
-//https://stackoverflow.com/questions/39696888/unable-to-sign-a-file-with-nodejs-crypto
-//https://kjur.github.io/jsrsasign/
-//https://github.com/cryptocoinjs/secp256k1-node
-//    https://stackoverflow.com/questions/39499040/generating-ecdsa-signature-with-node-js-crypto
-
-
 const crypto = require('crypto');
 const KeyEncoder = require('./keyEncoder');
 
@@ -45,7 +39,7 @@ function ECDSA(curveName){
 
         return signature;
     }
-    
+
     this.verify = function (publicKey,signature,digest) {
 
         var verify = crypto.createVerify('sha256');
