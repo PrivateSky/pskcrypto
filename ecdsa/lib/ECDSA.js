@@ -4,7 +4,7 @@ const KeyEncoder = require('./keyEncoder');
 
 
 function ECDSA(curveName){
-    this.curve = curveName;
+    this.curve = curveName || 'secp256k1';
     var self = this;
 
     this.generateKeyPair = function() {
@@ -22,7 +22,7 @@ function ECDSA(curveName){
         var keyEncoder = new KeyEncoder(self.curve);
 
         var privateKeyObject = keyEncoder.privateKeyObject(keys.private,keys.public);
-        var publicKeyObject =keyEncoder.publicKeyObject(keys.public);
+        var publicKeyObject = keyEncoder.publicKeyObject(keys.public);
 
         result.private = ECPrivateKeyASN.encode(privateKeyObject, 'pem', privateKeyObject.pemOptions);
         result.public = SubjectPublicKeyInfoASN.encode(publicKeyObject, 'pem', publicKeyObject.pemOptions);

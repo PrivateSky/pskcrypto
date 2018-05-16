@@ -1,69 +1,16 @@
 
 const crypto = require('crypto');
-const ssutil = require("../../ssutil");
+const ssutil = require("../../signsensusDS/ssutil");
 const KeyEncoder = require("./keyEncoder")
 const spv = require("../../tests/fakes/signaturePersistence").getSPV();
-
-
-
-
-function ECDSA(curve){
-
-
-    if(!curve){
-        curve = 'secp256k1';
-    }
-
-
-    this.generateKeyPair = function() {
-        var result = {};
-        var ec = crypto.createECDH(curve);
-        result.public = ec.generateKeys('hex');
-        result.private = ec.getPrivateKey('hex');
-        return keysToPEM(result);
-    }
-
-    function keysToPEM(keys){
-        var result = {};
-        var ECPrivateKeyASN = KeyEncoder.ECPrivateKeyASN;
-        var SubjectPublicKeyInfoASN = KeyEncoder.SubjectPublicKeyInfoASN;
-        var keyEncoder = new KeyEncoder(curve);
-
-        var privateKeyObject = keyEncoder.privateKeyObject(keys.private,keys.public);
-        var publicKeyObject =keyEncoder.publicKeyObject(keys.public);
-
-        result.private = ECPrivateKeyASN.encode(privateKeyObject, 'pem', privateKeyObject.pemOptions);
-        result.public = SubjectPublicKeyInfoASN.encode(publicKeyObject, 'pem', publicKeyObject.pemOptions);
-        return result;
-
-    }
-
-    this.sign = function (privateKey,digest) {
-        var sign = crypto.createSign("sha256");
-
-        sign.update(digest);
-
-        var signature = sign.sign(privateKey,'hex');
-
-        return signature;
-    }
-
-    this.verify = function (publicKey, digest, signature) {
-
-        var verify = crypto.createVerify('sha256');
-
-        verify.update(digest);
-
-        return verify.verify(publicKey,signature,'hex');
-    }
-}
+const ecdsa = require('./ECDSA');
 
 
 function AgentSignatureHandler(agentName){
 
     var agentHash = ssutil.hashValues(agentName);
 
-    var ecdsa = new ECDSA();
+    var ds = ecdsa.createECDSA();
 
     var keys = spv.getKeys(agentHash);
 
