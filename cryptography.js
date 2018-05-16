@@ -10,7 +10,7 @@ exports.sign = function(privateKey, digest){
     return ecdsa.sign(privateKey,digest);
 };
 
-exports.verify = function(publicKey, digest){
+exports.verify = function(publicKey, signature, digest){
     return ecdsa.verify(publicKey, digest);
 }
 
