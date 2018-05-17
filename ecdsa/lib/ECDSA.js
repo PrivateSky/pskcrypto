@@ -41,7 +41,6 @@ function ECDSA(curveName){
     }
 
     this.verify = function (publicKey,signature,digest) {
-
         var verify = crypto.createVerify('sha256');
 
         verify.update(digest);
