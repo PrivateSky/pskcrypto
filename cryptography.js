@@ -14,38 +14,49 @@ exports.verify = function(publicKey, signature, digest){
     return ecdsa.verify(publicKey, signature, digest);
 }
 
-function bytesToString(bytes){
-    var result = "";
-    for(var i = 0; i < bytes.length; i++){
-        result += (String.fromCharCode(bytes[i]));
-    }
-    return result;
-}
 
 exports.encryptJson = function(data, key){
     var iv = crypto.randomBytes(16);
-    var str = JSON.stringify(data);
+    var buf = Buffer.from(JSON.stringify(data), 'binary');
     var cipher = crypto.createCipheriv('aes-256-ctr', key,iv);
-    var crypted = cipher.update(str,'utf8','hex');
-    crypted += cipher.final('hex');
-    var ivStr = bytesToString(iv);
-    return ivStr + crypted;
+    var crypted = Buffer.from(cipher.update(buf,'binary'), 'binary');
+    var final = Buffer.from(cipher.final('binary'),'binary');
+    crypted = Buffer.concat([crypted, final]);
+    return Buffer.concat([iv, crypted]);
 };
 
 
-exports.decryptJson = function(ciphertext, key){
+exports.decryptJson = function(encryptedData, key){
 
-    var ivStr = ciphertext.slice(0,16);
-    var cipher = ciphertext.slice(16);
-    var iv = Buffer.from(ivStr,'binary');
+    var cipher = encryptedData.slice(16);
+    var iv = encryptedData.slice(0,16);
     var decipher = crypto.createDecipheriv('aes-256-ctr', key, iv);
-    var dec = decipher.update(cipher,'hex','utf8')
-    dec += decipher.final('utf8');
+    var dec = Buffer.from(decipher.update(cipher,'hex','binary'), 'binary');
+    var final = Buffer.from(decipher.final('binary'), 'binary');
+    dec = Buffer.concat([dec, final]);
 
-    return JSON.parse(dec);
+    return JSON.parse(dec.toString());
 };
 
+exports.encryptBlob = function (data, key) {
+    var iv = crypto.randomBytes(16);
+    var cipher = crypto.createCipheriv('aes-256-ctr', key,iv);
+    var crypted = Buffer.from(cipher.update(data),'binary');
+    var final = Buffer.from(cipher.final('binary'),'binary');
+    crypted = Buffer.concat([crypted, final]);
 
+    return Buffer.concat([iv, crypted]);
+};
+
+exports.decryptBlob = function (encryptedData, key) {
+    var cipher = encryptedData.slice(16);
+    var iv = encryptedData.slice(0,16);
+    var decipher = crypto.createDecipheriv('aes-256-ctr', key, iv);
+    var dec = Buffer.from(decipher.update(cipher,'hex','binary'), 'binary');
+    var final = Buffer.from(decipher.final('binary'), 'binary');
+
+    return Buffer.concat([dec, final]);
+};
 
 
 
