@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 var ecdsa = require('./ecdsa/lib/ECDSA').createECDSA();
+var algorithm = 'aes-256-gcm';
 
 exports.generateECDSAKeyPair = function(){
     return ecdsa.generateKeyPair();
@@ -18,20 +19,27 @@ exports.verify = function(publicKey, signature, digest){
 exports.encryptJson = function(data, key){
     var iv = crypto.randomBytes(16);
     var buf = Buffer.from(JSON.stringify(data), 'binary');
-    var cipher = crypto.createCipheriv('aes-256-ctr', key,iv);
-    var crypted = Buffer.from(cipher.update(buf,'binary'), 'binary');
+    var cipher = crypto.createCipheriv(algorithm, key, iv);
+
+    var encrypted = Buffer.from(cipher.update(buf,'binary'), 'binary');
     var final = Buffer.from(cipher.final('binary'),'binary');
-    crypted = Buffer.concat([crypted, final]);
-    return Buffer.concat([iv, crypted]);
+    encrypted = Buffer.concat([encrypted, final]);
+    var tag = cipher.getAuthTag();
+    return {
+        iv: iv,
+        content: encrypted,
+        tag: tag
+    }
 };
 
 
 exports.decryptJson = function(encryptedData, key){
 
-    var cipher = encryptedData.slice(16);
-    var iv = encryptedData.slice(0,16);
-    var decipher = crypto.createDecipheriv('aes-256-ctr', key, iv);
-    var dec = Buffer.from(decipher.update(cipher,'hex','binary'), 'binary');
+    var ciphertext = encryptedData.content;
+    var iv = encryptedData.iv;
+    var decipher = crypto.createDecipheriv(algorithm, key, iv);
+    decipher.setAuthTag(encryptedData.tag);
+    var dec = Buffer.from(decipher.update(ciphertext,'hex','binary'), 'binary');
     var final = Buffer.from(decipher.final('binary'), 'binary');
     dec = Buffer.concat([dec, final]);
 
@@ -40,19 +48,25 @@ exports.decryptJson = function(encryptedData, key){
 
 exports.encryptBlob = function (data, key) {
     var iv = crypto.randomBytes(16);
-    var cipher = crypto.createCipheriv('aes-256-ctr', key,iv);
-    var crypted = Buffer.from(cipher.update(data),'binary');
+    var cipher = crypto.createCipheriv(algorithm, key,iv);
+    var encrypted = Buffer.from(cipher.update(data),'binary');
     var final = Buffer.from(cipher.final('binary'),'binary');
-    crypted = Buffer.concat([crypted, final]);
+    encrypted = Buffer.concat([encrypted, final]);
 
-    return Buffer.concat([iv, crypted]);
+    var tag = cipher.getAuthTag();
+    return {
+        iv: iv,
+        content: encrypted,
+        tag: tag
+    }
 };
 
 exports.decryptBlob = function (encryptedData, key) {
-    var cipher = encryptedData.slice(16);
-    var iv = encryptedData.slice(0,16);
-    var decipher = crypto.createDecipheriv('aes-256-ctr', key, iv);
-    var dec = Buffer.from(decipher.update(cipher,'hex','binary'), 'binary');
+    var ciphertext = encryptedData.content;
+    var iv = encryptedData.iv;
+    var decipher = crypto.createDecipheriv(algorithm, key, iv);
+    decipher.setAuthTag(encryptedData.tag);
+    var dec = Buffer.from(decipher.update(ciphertext,'hex','binary'), 'binary');
     var final = Buffer.from(decipher.final('binary'), 'binary');
 
     return Buffer.concat([dec, final]);
