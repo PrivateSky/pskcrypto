@@ -37,10 +37,11 @@ exports.encryptJson = function(data, key, aad){
 
 exports.decryptJson = function(encryptedData, key, aad){
     var cryptoObj = JSON.parse(encryptedData);
-    var ciphertext = cryptoObj.content;
-    var iv = cryptoObj.iv;
+    var ciphertext = Buffer.from(cryptoObj.content, 'binary');
+    var iv = Buffer.from(cryptoObj.iv,'binary');
     var decipher = crypto.createDecipheriv(algorithm, key, iv);
-    decipher.setAuthTag(cryptoObj.tag);
+    var tag = Buffer.from(cryptoObj.tag,'binary');
+    decipher.setAuthTag(tag);
     decipher.setAAD(aad);
     var dec = Buffer.from(decipher.update(ciphertext,'hex','binary'), 'binary');
     var final = Buffer.from(decipher.final('binary'), 'binary');
@@ -69,10 +70,11 @@ exports.encryptBlob = function (data, key, aad) {
 
 exports.decryptBlob = function (encryptedData, key, aad) {
     var cryptoObj = JSON.parse(encryptedData);
-    var ciphertext = cryptoObj.content;
-    var iv = cryptoObj.iv;
+    var ciphertext = Buffer.from(cryptoObj.content, 'binary');
+    var iv = Buffer.from(cryptoObj.iv,'binary');
     var decipher = crypto.createDecipheriv(algorithm, key, iv);
-    decipher.setAuthTag(cryptoObj.tag);
+    var tag = Buffer.from(cryptoObj.tag, 'binary');
+    decipher.setAuthTag(tag);
     decipher.setAAD(aad);
     var dec = Buffer.from(decipher.update(ciphertext,'hex','binary'), 'binary');
     var final = Buffer.from(decipher.final('binary'), 'binary');
