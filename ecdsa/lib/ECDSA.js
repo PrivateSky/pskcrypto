@@ -1,8 +1,6 @@
 const crypto = require('crypto');
 const KeyEncoder = require('./keyEncoder');
 
-
-
 function ECDSA(curveName){
     this.curve = curveName || 'secp256k1';
     var self = this;
@@ -13,7 +11,7 @@ function ECDSA(curveName){
         result.public = ec.generateKeys('hex');
         result.private = ec.getPrivateKey('hex');
         return keysToPEM(result);
-    }
+    };
 
     function keysToPEM(keys){
         var result = {};
@@ -38,7 +36,7 @@ function ECDSA(curveName){
         var signature = sign.sign(privateKey,'hex');
 
         return signature;
-    }
+    };
 
     this.verify = function (publicKey,signature,digest) {
         var verify = crypto.createVerify('sha256');
@@ -47,15 +45,8 @@ function ECDSA(curveName){
 
         return verify.verify(publicKey,signature,'hex');
     }
-
 }
-
-
 
 exports.createECDSA = function (curve){
     return new ECDSA(curve);
-}
-
-
-
-
+};
