@@ -3,7 +3,6 @@ const fs = require('fs');
 var ecdsa = require('./ecdsa/lib/ECDSA').createECDSA();
 
 var algorithm = 'aes-256-gcm';
-const defaultSalt = Buffer.from('defaultSalt');
 
 exports.generateECDSAKeyPair = function(){
     return ecdsa.generateKeyPair();
@@ -19,7 +18,8 @@ exports.verify = function(publicKey, signature, digest){
 };
 
 exports.saveDerivedSeed = function(seed, pin, pinIterations, dseedLen){
-    var dseed = crypto.pbkdf2Sync(seed, defaultSalt, 10000000, dseedLen, 'sha512');
+    var seedSalt = crypto.randomBytes(64);
+    var dseed = crypto.pbkdf2Sync(seed, seedSalt, 10000, dseedLen, 'sha512');
     var pinSalt = crypto.randomBytes(64);
     var dpin = crypto.pbkdf2Sync(pin, pinSalt, pinIterations, 32, 'sha512');
     var cipher = crypto.createCipher('aes-256-cfb', dpin);
