@@ -17,34 +17,55 @@ exports.verify = function(publicKey, signature, digest){
     return ecdsa.verify(publicKey, signature, digest);
 };
 
-exports.saveDerivedSeed = function(seed, pin, pinIterations, dseedLen){
-    var seedHash = crypto.createHash('sha512');
-    seedHash.update(seed);
-    var digest = Buffer.from(seedHash.digest('hex'), 'binary');
-    var seedSalt = digest.slice(0, digest.length/2);
-    var dseed = crypto.pbkdf2Sync(seed, seedSalt, 100000, dseedLen, 'sha512');
-    var pinSalt = crypto.randomBytes(64);
-    var dpin = crypto.pbkdf2Sync(pin, pinSalt, pinIterations, 32, 'sha512');
-    var cipher = crypto.createCipher('aes-256-cfb', dpin);
+function generateSalt(inputData, saltLen){
+    var hash = crypto.createHash('sha512');
+    hash.update(inputData);
+    var digest = Buffer.from(hash.digest('hex'), 'binary');
+
+    var salt = digest.slice(0, saltLen);
+
+    return salt;
+}
+
+function encryptDSeed(dseed, encryptionKey){
+    var cipher = crypto.createCipher('aes-256-cfb', encryptionKey);
     var ciphertext = cipher.update(dseed, 'binary');
     var final = Buffer.from(cipher.final('binary'), 'binary');
-    ciphertext = Buffer.concat([ciphertext, final, pinSalt]);
+    ciphertext = Buffer.concat([ciphertext, final]);
 
-    fs.writeFileSync('dseed', ciphertext);
+    return ciphertext;
+}
+
+function decryptDSeed(encryptedDSeed, encryptionKey) {
+    var seedDechiper = crypto.createDecipher('aes-256-cfb', encryptionKey);
+    var dseed = Buffer.from(seedDechiper.update(encryptedDSeed,'hex','binary'));
+    var final = Buffer.from(seedDechiper.final('binary'));
+
+    var dseed = Buffer.concat([dseed, final]);
+
+    return dseed;
+}
+
+exports.saveDerivedSeed = function(seed, pin, pinIterations, dseedLen){
+
+    var seedSalt = generateSalt(seed, 64);
+    var dseed = crypto.pbkdf2Sync(seed, seedSalt, 100000, dseedLen, 'sha512');
+    var pinSalt = generateSalt(pin, 64);
+    var dpin = crypto.pbkdf2Sync(pin, pinSalt, pinIterations, 32, 'sha512');
+    var encryptedDSeed = encryptDSeed(dseed, dpin);
+
+    fs.writeFileSync('dseed', encryptedDSeed);
 
 
 };
 
-exports.encryptJson = function(data, pin, pinIterations, dseedLen){
-    var fileContent = fs.readFileSync('dseed');
-    var encryptedDSeed = fileContent.slice(0,dseedLen);
-    var pinSalt = fileContent.slice(dseedLen);
-    var dpin = crypto.pbkdf2Sync(pin, pinSalt, pinIterations, 32, 'sha512');
-    var seedDechiper = crypto.createDecipher('aes-256-cfb', dpin);
-    var dseed = Buffer.from(seedDechiper.update(encryptedDSeed,'hex','binary'));
-    var final = Buffer.from(seedDechiper.final('binary'));
+exports.encryptJson = function(data, pin, pinIterations){
 
-    dseed = Buffer.concat([dseed, final]);
+    var encryptedDSeed = fs.readFileSync('dseed');
+    var pinSalt = generateSalt(pin, 64);
+    var dpin = crypto.pbkdf2Sync(pin, pinSalt, pinIterations, 32, 'sha512');
+
+    var dseed = decryptDSeed(encryptedDSeed, dpin);
 
     var keySalt = crypto.randomBytes(64);
     var key = crypto.pbkdf2Sync(dseed, keySalt, 100000, 32, 'sha512');
@@ -72,15 +93,11 @@ exports.encryptJson = function(data, pin, pinIterations, dseedLen){
 
 
 exports.decryptJson = function(encryptedData, pin, pinIterations, dseedLen){
-    var fileContent = fs.readFileSync('dseed');
-    var encryptedDSeed = fileContent.slice(0,dseedLen);
-    var pinSalt = fileContent.slice(dseedLen);
+    var encryptedDSeed = fs.readFileSync('dseed');;
+    var pinSalt = generateSalt(pin, 64);
     var dpin = crypto.pbkdf2Sync(pin, pinSalt, pinIterations, 32, 'sha512');
-    var seedDechiper = crypto.createDecipher('aes-256-cfb', dpin);
-    var dseed = Buffer.from(seedDechiper.update(encryptedDSeed,'hex','binary'));
-    var final = Buffer.from(seedDechiper.final('binary'));
 
-    dseed = Buffer.concat([dseed, final]);
+    var dseed = decryptDSeed(encryptedDSeed, dpin);
 
     var iv = encryptedData.slice(0, 12);
     var salt = encryptedData.slice(12, 140);
@@ -106,15 +123,11 @@ exports.decryptJson = function(encryptedData, pin, pinIterations, dseedLen){
 };
 
 exports.encryptBlob = function (data, pin, pinIterations, dseedLen) {
-    var fileContent = fs.readFileSync('dseed');
-    var encryptedDSeed = fileContent.slice(0,dseedLen);
-    var pinSalt = fileContent.slice(dseedLen);
-    var dpin = crypto.pbkdf2Sync(pin, pinSalt, pinIterations, 32, 'sha512');
-    var seedDechiper = crypto.createDecipher('aes-256-cfb', dpin);
-    var dseed = Buffer.from(seedDechiper.update(encryptedDSeed,'hex','binary'));
-    var final = Buffer.from(seedDechiper.final('binary'));
 
-    dseed = Buffer.concat([dseed, final]);
+    var encryptedDSeed = fs.readFileSync('dseed');
+    var pinSalt = generateSalt(pin, 64);
+    var dpin = crypto.pbkdf2Sync(pin, pinSalt, pinIterations, 32, 'sha512');
+    var dseed = decryptDSeed(encryptedDSeed, dpin);
 
     var keySalt = crypto.randomBytes(64);
     var key = crypto.pbkdf2Sync(dseed, keySalt, 100000, 32, 'sha512');
@@ -139,17 +152,11 @@ exports.encryptBlob = function (data, pin, pinIterations, dseedLen) {
     return Buffer.concat(cipherText);
 };
 
-exports.decryptBlob = function (encryptedData, pin, pinIterations, dseedLen) {
-    var fileContent = fs.readFileSync('dseed');
-    var encryptedDSeed = fileContent.slice(0,dseedLen);
-    var pinSalt = fileContent.slice(dseedLen);
+exports.decryptBlob = function (encryptedData, pin, pinIterations) {
+    var encryptedDSeed = fs.readFileSync('dseed');
+    var pinSalt = generateSalt(pin, 64);
     var dpin = crypto.pbkdf2Sync(pin, pinSalt, pinIterations, 32, 'sha512');
-    var seedDechiper = crypto.createDecipher('aes-256-cfb', dpin);
-    var dseed = Buffer.from(seedDechiper.update(encryptedDSeed,'hex','binary'));
-    var final = Buffer.from(seedDechiper.final('binary'));
-
-    dseed = Buffer.concat([dseed, final]);
-
+    var dseed = decryptDSeed(encryptedDSeed, dpin);
     var iv = encryptedData.slice(0, 12);
     var salt = encryptedData.slice(12, 140);
     var keySalt = salt.slice(0, 64);
