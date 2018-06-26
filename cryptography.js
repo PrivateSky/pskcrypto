@@ -18,8 +18,11 @@ exports.verify = function(publicKey, signature, digest){
 };
 
 exports.saveDerivedSeed = function(seed, pin, pinIterations, dseedLen){
-    var seedSalt = crypto.randomBytes(64);
-    var dseed = crypto.pbkdf2Sync(seed, seedSalt, 10000, dseedLen, 'sha512');
+    var seedHash = crypto.createHash('sha512');
+    seedHash.update(seed);
+    var digest = Buffer.from(seedHash.digest('hex'), 'binary');
+    var seedSalt = digest.slice(0, digest.length/2);
+    var dseed = crypto.pbkdf2Sync(seed, seedSalt, 100000, dseedLen, 'sha512');
     var pinSalt = crypto.randomBytes(64);
     var dpin = crypto.pbkdf2Sync(pin, pinSalt, pinIterations, 32, 'sha512');
     var cipher = crypto.createCipher('aes-256-cfb', dpin);
@@ -44,13 +47,13 @@ exports.encryptJson = function(data, pin, pinIterations, dseedLen){
     dseed = Buffer.concat([dseed, final]);
 
     var keySalt = crypto.randomBytes(64);
-    var key = crypto.pbkdf2Sync(dseed, keySalt, 1000, 32, 'sha512');
+    var key = crypto.pbkdf2Sync(dseed, keySalt, 100000, 32, 'sha512');
 
     var aadSalt = crypto.randomBytes(64);
-    var aad = crypto.pbkdf2Sync(dseed, aadSalt, 1000, 32, 'sha512');
+    var aad = crypto.pbkdf2Sync(dseed, aadSalt, 100000, 32, 'sha512');
 
     var salt = Buffer.concat([keySalt, aadSalt]);
-    var iv = crypto.pbkdf2Sync(dseed, salt, 1000, 12, 'sha512');
+    var iv = crypto.pbkdf2Sync(dseed, salt, 100000, 12, 'sha512');
 
     var buf = Buffer.from(JSON.stringify(data), 'binary');
     var cipher = crypto.createCipheriv(algorithm, key, iv);
@@ -84,8 +87,8 @@ exports.decryptJson = function(encryptedData, pin, pinIterations, dseedLen){
     var keySalt = salt.slice(0, 64);
     var aadSalt = salt.slice(-64);
 
-    var key = crypto.pbkdf2Sync(dseed, keySalt, 1000, 32, 'sha512');
-    var aad = crypto.pbkdf2Sync(dseed, aadSalt, 1000, 32, 'sha512');
+    var key = crypto.pbkdf2Sync(dseed, keySalt, 100000, 32, 'sha512');
+    var aad = crypto.pbkdf2Sync(dseed, aadSalt, 100000, 32, 'sha512');
 
     var ciphertext = encryptedData.slice(140, encryptedData.length - 16);
     var tag = encryptedData.slice(-16);
@@ -114,13 +117,13 @@ exports.encryptBlob = function (data, pin, pinIterations, dseedLen) {
     dseed = Buffer.concat([dseed, final]);
 
     var keySalt = crypto.randomBytes(64);
-    var key = crypto.pbkdf2Sync(dseed, keySalt, 1000, 32, 'sha512');
+    var key = crypto.pbkdf2Sync(dseed, keySalt, 100000, 32, 'sha512');
 
     var aadSalt = crypto.randomBytes(64);
-    var aad = crypto.pbkdf2Sync(dseed, aadSalt, 1000, 32, 'sha512');
+    var aad = crypto.pbkdf2Sync(dseed, aadSalt, 100000, 32, 'sha512');
 
     var salt = Buffer.concat([keySalt, aadSalt]);
-    var iv = crypto.pbkdf2Sync(dseed, salt, 1000, 12, 'sha512');
+    var iv = crypto.pbkdf2Sync(dseed, salt, 100000, 12, 'sha512');
 
     var cipher = crypto.createCipheriv(algorithm, key, iv);
     cipher.setAAD(aad);
@@ -152,8 +155,8 @@ exports.decryptBlob = function (encryptedData, pin, pinIterations, dseedLen) {
     var keySalt = salt.slice(0, 64);
     var aadSalt = salt.slice(-64);
 
-    var key = crypto.pbkdf2Sync(dseed, keySalt, 1000, 32, 'sha512');
-    var aad = crypto.pbkdf2Sync(dseed, aadSalt, 1000, 32, 'sha512');
+    var key = crypto.pbkdf2Sync(dseed, keySalt, 100000, 32, 'sha512');
+    var aad = crypto.pbkdf2Sync(dseed, aadSalt, 100000, 32, 'sha512');
 
     var ciphertext = encryptedData.slice(140, encryptedData.length - 16);
     var tag = encryptedData.slice(-16);
