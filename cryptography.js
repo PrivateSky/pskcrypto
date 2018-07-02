@@ -75,6 +75,42 @@ function decrypt(encryptedData, password){
     return plaintext;
 }
 
+function encryptDSeed(dseed, pin, folderPath) {
+    pin = pin || defaultPin;
+    folderPath = folderPath || './.privateSky/';
+
+    var encryptionKey = deriveKey(pin, null, null);
+    var iv = crypto.randomBytes(16);
+
+    var cipher = crypto.createCipheriv('aes-256-cfb', encryptionKey, iv);
+    var encryptedDSeed = cipher.update(dseed,'binary');
+    var final = Buffer.from(cipher.final('binary'),'binary');
+    encryptedDSeed = Buffer.concat([iv, encryptedDSeed, final]);
+    if(!fs.existsSync(folderPath)){
+        fs.mkdirSync(folderPath);
+    }
+    fs.writeFileSync(folderPath + 'dseed', encryptedDSeed);
+    return encryptedDSeed;
+
+
+}
+
+function decryptDseed(pin, dseedPath) {
+    pin = pin || defaultPin;
+    dseedPath = dseedPath || defaultDSeedPath;
+    var encryptedData = fs.readFileSync(dseedPath);
+    var iv = encryptedData.slice(0,16);
+    var encryptedDseed = encryptedData.slice(16);
+    var encryptionKey = deriveKey(pin, null, null);
+
+    var decipher = crypto.createDecipheriv('aes-256-cfb', encryptionKey, iv);
+    var dseed = Buffer.from(decipher.update(encryptedDseed, 'binary'), 'binary');
+    var final = Buffer.from(decipher.final('binary'), 'binary');
+    dseed = Buffer.concat([dseed, final]);
+
+    return dseed;
+
+}
 
 function deriveKey(password, iterations, dkLen) {
     iterations = iterations || 10000;
@@ -84,36 +120,23 @@ function deriveKey(password, iterations, dkLen) {
     return Buffer.from(dk);
 }
 exports.saveDerivedSeed = function(seed, pin, dseedLen, folderPath){
-    folderPath = folderPath || './.privateSky/';
     pin = pin || defaultPin;
     var dseed = deriveKey(seed, null, dseedLen);
-    var encryptedDSeed = encrypt(dseed, pin);
-
-    if(!fs.existsSync(folderPath)){
-        fs.mkdirSync(folderPath);
-    }
-    fs.writeFileSync(folderPath + 'dseed', encryptedDSeed);
-
-
+    encryptDSeed(dseed, pin, folderPath);
 };
 
-exports.setPin = function(pin, dseedPath){
-    dseedPath = dseedPath || defaultDSeedPath;
+exports.setPin = function(pin, auxFolderPath){
+    auxFolderPath = auxFolderPath || './.privateSky/';
+    var dseedPath = auxFolderPath + 'dseed';
     var oldPin = defaultPin;
-    var encryptedDSeed = fs.readFileSync(dseedPath);
-    var dseed = decrypt(encryptedDSeed, oldPin);
-
-    encryptedDSeed = encrypt(dseed, pin);
-    fs.writeFileSync(dseedPath, encryptedDSeed);
-
+    var dseed = decryptDseed(oldPin, dseedPath);
+    encryptDSeed(dseed, pin, auxFolderPath);
 };
+
 exports.encryptJson = function(data, pin, dseedPath){
     pin = pin || defaultPin;
     dseedPath = dseedPath || defaultDSeedPath;
-    var encryptedDSeed = fs.readFileSync(dseedPath);
-
-    // var dpin = deriveKey(pin, null, null);
-    var dseed = decrypt(encryptedDSeed, pin);
+    var dseed = decryptDseed(pin, dseedPath);
 
     var cipherText = encrypt(JSON.stringify(data), dseed);
 
@@ -125,10 +148,7 @@ exports.encryptJson = function(data, pin, dseedPath){
 exports.decryptJson = function(encryptedData, pin, dseedPath){
     pin = pin || defaultPin;
     dseedPath = dseedPath || defaultDSeedPath;
-    var encryptedDSeed = fs.readFileSync(dseedPath);
-
-
-    var dseed = decrypt(encryptedDSeed, pin);
+    var dseed = decryptDseed(pin, dseedPath);
     var plaintext = decrypt(encryptedData, dseed);
 
     return JSON.parse(plaintext);
@@ -137,8 +157,7 @@ exports.decryptJson = function(encryptedData, pin, dseedPath){
 exports.encryptBlob = function (data, pin, dseedPath) {
     pin = pin || defaultPin;
     dseedPath = dseedPath || defaultDSeedPath;
-    var encryptedDSeed = fs.readFileSync(dseedPath);
-    var dseed = decrypt(encryptedDSeed, pin);
+    var dseed = decryptDseed(pin, dseedPath);
     var ciphertext = encrypt(data, dseed);
 
     return ciphertext;
@@ -147,8 +166,7 @@ exports.encryptBlob = function (data, pin, dseedPath) {
 exports.decryptBlob = function (encryptedData, pin, dseedPath) {
     pin = pin || defaultPin;
     dseedPath = dseedPath || defaultDSeedPath;
-    var encryptedDSeed = fs.readFileSync(dseedPath);
-    var dseed = decrypt(encryptedDSeed, pin);
+    var dseed = decryptDseed(pin, dseedPath);
 
     var plaintext = decrypt(encryptedData, dseed);
 
