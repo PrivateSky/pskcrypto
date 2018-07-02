@@ -97,12 +97,11 @@ exports.saveDerivedSeed = function(seed, pin, dseedLen, folderPath){
 
 };
 
-exports.setPin = function(pin, dseedLen, dseedPath){
-    dseedLen = dseedLen || 32;
+exports.setPin = function(pin, dseedPath){
     dseedPath = dseedPath || defaultDSeedPath;
     var oldPin = defaultPin;
     var encryptedDSeed = fs.readFileSync(dseedPath);
-    var dseed = decrypt(encryptedDSeed, encryptionKey);
+    var dseed = decrypt(encryptedDSeed, oldPin);
 
     encryptedDSeed = encrypt(dseed, pin);
     fs.writeFileSync(dseedPath, encryptedDSeed);
