@@ -18,14 +18,26 @@ exports.verify = function(publicKey, signature, digest){
     return ecdsa.verify(publicKey, signature, digest);
 };
 
+function createHash(data){
+    var hash = crypto.createHash('sha512');
+    hash.update(data);
+    return hash.digest();
+}
+
+exports.hashJson = function (data) {
+    var serializedData = JSON.stringify(data);
+    return createHash(serializedData);
+};
+
+exports.hashBlob = function (data) {
+    return createHash(data);
+};
+
 function generateSalt(inputData, saltLen){
     var hash = crypto.createHash('sha512');
     hash.update(inputData);
     var digest = Buffer.from(hash.digest('hex'), 'binary');
-
-    var salt = digest.slice(0, saltLen);
-
-    return salt;
+    return digest.slice(0, saltLen);
 }
 
 function encrypt(data, password){
@@ -46,9 +58,8 @@ function encrypt(data, password){
     var tag = cipher.getAuthTag();
 
     encryptedText = Buffer.concat([encryptedText, final]);
-    var cipherText =  Buffer.concat([salt, encryptedText, tag]);
 
-    return cipherText;
+    return Buffer.concat([salt, encryptedText, tag]);;
 }
 
 function decrypt(encryptedData, password){
