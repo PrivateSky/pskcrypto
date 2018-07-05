@@ -4,7 +4,6 @@ var ecdsa = require('./ecdsa/lib/ECDSA').createECDSA();
 
 var algorithm = 'aes-256-gcm';
 var defaultPin = '12345678';
-var defaultDSeedPath = './.privateSky/dseed';
 exports.generateECDSAKeyPair = function(){
     return ecdsa.generateKeyPair();
 };
@@ -86,9 +85,8 @@ function decrypt(encryptedData, password){
     return plaintext;
 }
 
-function encryptDSeed(dseed, pin, folderPath) {
+function encryptDSeed(dseed, pin, dseedPath) {
     pin = pin || defaultPin;
-    folderPath = folderPath || './.privateSky/';
 
     var encryptionKey = deriveKey(pin, null, null);
     var iv = crypto.randomBytes(16);
@@ -97,10 +95,7 @@ function encryptDSeed(dseed, pin, folderPath) {
     var encryptedDSeed = cipher.update(dseed,'binary');
     var final = Buffer.from(cipher.final('binary'),'binary');
     encryptedDSeed = Buffer.concat([iv, encryptedDSeed, final]);
-    if(!fs.existsSync(folderPath)){
-        fs.mkdirSync(folderPath);
-    }
-    fs.writeFileSync(folderPath + 'dseed', encryptedDSeed);
+    fs.writeFileSync(dseedPath, encryptedDSeed);
     return encryptedDSeed;
 
 
@@ -108,7 +103,6 @@ function encryptDSeed(dseed, pin, folderPath) {
 
 function decryptDseed(pin, dseedPath) {
     pin = pin || defaultPin;
-    dseedPath = dseedPath || defaultDSeedPath;
     var encryptedData = fs.readFileSync(dseedPath);
     var iv = encryptedData.slice(0,16);
     var encryptedDseed = encryptedData.slice(16);
@@ -130,27 +124,22 @@ function deriveKey(password, iterations, dkLen) {
     var dk = crypto.pbkdf2Sync(password, salt, iterations, dkLen, 'sha512');
     return Buffer.from(dk);
 }
-exports.saveDerivedSeed = function(seed, pin, dseedLen, folderPath){
+exports.saveDerivedSeed = function(seed, pin, dseedLen, dseedPath){
     pin = pin || defaultPin;
     var dseed = deriveKey(seed, null, dseedLen);
-    encryptDSeed(dseed, pin, folderPath);
+    encryptDSeed(dseed, pin, dseedPath);
 };
 
-exports.setPin = function(pin, auxFolderPath){
-    auxFolderPath = auxFolderPath || './.privateSky/';
-    var dseedPath = auxFolderPath + 'dseed';
+exports.setPin = function(pin, dseedPath){
     var oldPin = defaultPin;
     var dseed = decryptDseed(oldPin, dseedPath);
-    encryptDSeed(dseed, pin, auxFolderPath);
+    encryptDSeed(dseed, pin, dseedPath);
 };
 
 exports.encryptJson = function(data, pin, dseedPath){
     pin = pin || defaultPin;
-    dseedPath = dseedPath || defaultDSeedPath;
     var dseed = decryptDseed(pin, dseedPath);
-
     var cipherText = encrypt(JSON.stringify(data), dseed);
-
 
     return cipherText;
 };
@@ -158,7 +147,6 @@ exports.encryptJson = function(data, pin, dseedPath){
 
 exports.decryptJson = function(encryptedData, pin, dseedPath){
     pin = pin || defaultPin;
-    dseedPath = dseedPath || defaultDSeedPath;
     var dseed = decryptDseed(pin, dseedPath);
     var plaintext = decrypt(encryptedData, dseed);
 
@@ -167,7 +155,6 @@ exports.decryptJson = function(encryptedData, pin, dseedPath){
 
 exports.encryptBlob = function (data, pin, dseedPath) {
     pin = pin || defaultPin;
-    dseedPath = dseedPath || defaultDSeedPath;
     var dseed = decryptDseed(pin, dseedPath);
     var ciphertext = encrypt(data, dseed);
 
@@ -176,9 +163,7 @@ exports.encryptBlob = function (data, pin, dseedPath) {
 
 exports.decryptBlob = function (encryptedData, pin, dseedPath) {
     pin = pin || defaultPin;
-    dseedPath = dseedPath || defaultDSeedPath;
     var dseed = decryptDseed(pin, dseedPath);
-
     var plaintext = decrypt(encryptedData, dseed);
 
     return plaintext;
