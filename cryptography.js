@@ -118,34 +118,31 @@ exports.deriveSeed = function (seed, dseedLen) {
 
 };
 
-exports.encryptJson = function(data, pin, dseedPath){
-	var dseed       = exports.decryptDseed(pin, dseedPath);
+exports.encryptJson = function(data, dseed){
 	var cipherText  = encrypt(JSON.stringify(data), dseed);
 
 	return cipherText;
 };
 
-exports.decryptJson = function(encryptedData, pin, dseedPath){
-	var dseed     = exports.decryptDseed(pin, dseedPath);
+exports.decryptJson = function(encryptedData, dseed){
 	var plaintext = decrypt(encryptedData, dseed);
 
 	return JSON.parse(plaintext);
 };
 
-exports.encryptBlob = function (data, pin, dseedPath) {
-	var dseed       = exports.decryptDseed(pin, dseedPath);
+exports.encryptBlob = function (data, dseed) {
 	var ciphertext  = encrypt(data, dseed);
 
 	return ciphertext;
 };
 
-exports.decryptBlob = function (encryptedData, pin, dseedPath) {
-	var dseed       = exports.decryptDseed(pin, dseedPath);
+exports.decryptBlob = function (encryptedData, dseed) {
 	var plaintext   = decrypt(encryptedData, dseed);
 
 	return plaintext;
 };
 
-exports.generateSeed = function(){
-	return crypto.randomBytes(32);
+exports.generateSeed = function(seedLen){
+	seedLen = seedLen || 32;
+	return crypto.randomBytes(seedLen);
 };
