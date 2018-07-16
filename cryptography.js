@@ -15,19 +15,28 @@ exports.verify = function(publicKey, signature, digest){
 	return ecdsa.verify(publicKey, signature, digest);
 };
 
-function createHash(data){
-	var hash = crypto.createHash('sha512');
-	hash.update(data);
-	return hash.digest();
+function createPskHash(data){
+	var hash512 = crypto.createHash('sha512');
+	var hash256 = crypto.createHash('sha256');
+	hash512.update(data);
+	hash256.update(hash512.digest());
+	return hash256.digest();
 }
 
-exports.hashJson = function (data) {
-	var serializedData = JSON.stringify(data);
-	return createHash(serializedData);
-};
-
-exports.hashBlob = function (data) {
-	return createHash(data);
+function isJson(data){
+	try{
+		JSON.parse(data);
+	}catch(e){
+		return false;
+	}
+	return true;
+}
+exports.pskHash = function (data) {
+	if(isJson(data)){
+		return createPskHash(JSON.stringify(data));
+	}else{
+		return createPskHash(data);
+	}
 };
 
 function generateSalt(inputData, saltLen){
