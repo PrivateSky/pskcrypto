@@ -75,7 +75,7 @@ exports.generatePosHashXTimes = function generatePosHashXTimes(buffer, pos, size
     return exports.wipeOutsidePayload(result, pos, size);
 }
 
-exports.hashStringArray = function hashStringArray(counter, arr, payloadSize){
+exports.hashStringArray = function (counter, arr, payloadSize){
 
     const hash = crypto.createHash('sha256');
     var result = counter.toString(16);
@@ -158,7 +158,7 @@ exports.dumpObjectForHashing = function(obj){
 }
 
 
-exports.hashValues  = function hashStringArray(values){
+exports.hashValues  = function (values){
     const hash = crypto.createHash('sha256');
     var result = exports.dumpObjectForHashing(values);
     hash.update(result);
@@ -188,7 +188,7 @@ exports.getJSONFromSignature = function getJSONFromSignature(signature, size){
     return result;
 }
 
-exports.createSignature = function hashStringArray(agent,counter, nextPublic, arr, size){
+exports.createSignature = function (agent,counter, nextPublic, arr, size){
     var result = "";
 
     for(var i = 0; i < arr.length; i++){
