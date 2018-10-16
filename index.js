@@ -2,10 +2,10 @@ const PskCrypto = require("./lib/PskCrypto");
 
 const ssutil = require("./signsensusDS/ssutil");
 
-const uidGenerator = require("./lib/uidGenerator").createUidGenerator(20, 32);
+const uidGenerator = require("./lib/uidGenerator").createUidGenerator(200, 64);
 
 module.exports = PskCrypto;
 
 module.exports.hashValues = ssutil.hashValues;
-
-module.exports.generateUid = uidGenerator.getNbytes;
+module.exports.uidGenerator = uidGenerator;
+module.exports.generateUid = uidGenerator.generateUid;
