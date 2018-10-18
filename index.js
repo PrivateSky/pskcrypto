@@ -8,4 +8,4 @@ module.exports = PskCrypto;
 
 module.exports.hashValues = ssutil.hashValues;
 module.exports.uidGenerator = uidGenerator;
-// module.exports.generateUid = uidGenerator.generateUid;
+module.exports.generateUid = uidGenerator.generateUid;
