@@ -5,3 +5,6 @@ module.exports = PskCrypto;
 
 module.exports.hashValues = ssutil.hashValues;
 
+module.exports.archiver = require("./lib/psk-archiver");
+
+module.exports.WritableStream = require("./lib/utils/WritableStream");
