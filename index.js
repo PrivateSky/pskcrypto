@@ -7,6 +7,6 @@ module.exports.hashValues = ssutil.hashValues;
 
 module.exports.archiver = require("./lib/psk-archiver");
 
-module.exports.WritableStream = require("./lib/utils/WritableStream");
+module.exports.WritableStream = require("./lib/utils/DuplexStream");
 
 module.exports.isStream = require("./lib/utils/isStream");
