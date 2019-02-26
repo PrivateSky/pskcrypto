@@ -5,7 +5,7 @@ module.exports = PskCrypto;
 
 module.exports.hashValues = ssutil.hashValues;
 
-module.exports.archiver = require("./lib/psk-archiver");
+module.exports.PskArchiver = require("./lib/psk-archiver");
 
 module.exports.DuplexStream = require("./lib/utils/DuplexStream");
 
