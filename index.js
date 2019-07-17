@@ -5,7 +5,9 @@ module.exports = PskCrypto;
 
 module.exports.hashValues = ssutil.hashValues;
 
-module.exports.PskArchiver = require("./lib/psk-archiver");
+if(typeof(___DISABLE_OBSOLETE_ZIP_ARCHIVER_WAIT_FOR_BARS) === 'undefined'){
+    module.exports.PskArchiver = require("./lib/psk-archiver");
+}
 
 module.exports.DuplexStream = require("./lib/utils/DuplexStream");
 
