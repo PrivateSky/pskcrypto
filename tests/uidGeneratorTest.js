@@ -19,7 +19,7 @@ function FakeGenerator(){
 		for(let i=0; i<size; i++){
 			arr.push(counter++);
 		}
-		return Buffer.from(arr);
+		return $$.Buffer.from(arr);
 	}
 
 }
@@ -32,7 +32,7 @@ var sizes = [128, 100, 87, 32];
 for(let i=0; i<10000; i++){
 	arr.push(i);
 }
-var buff = Buffer.from(arr);
+var buff = $$.Buffer.from(arr);
 /*crypto.randomBytes = function (size, callback) {
 	if(!callback){
 		return fg.generate(size);

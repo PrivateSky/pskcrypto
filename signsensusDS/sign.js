@@ -28,7 +28,7 @@ function SignsensusSignatureChain(agent, PROOF_BLOCK_SIZE , loader){
 
 
         var result = {}
-        result.private = Buffer.alloc(32);
+        result.private = $$.Buffer.alloc(32);
         crypto.randomFillSync(result.private);
 
         var proof = [];
@@ -50,8 +50,8 @@ function SignsensusSignatureChain(agent, PROOF_BLOCK_SIZE , loader){
 
 
         var digest = ssutil.hashValues(digestForSigning);
-        const directDigest = Buffer.from(digest, 'hex');
-        const nonDigest = Buffer.alloc(32);
+        const directDigest = $$.Buffer.from(digest, 'hex');
+        const nonDigest = $$.Buffer.alloc(32);
         for(var i=0; i< 32; i++){
             nonDigest[i] = 255 - directDigest[i];
         }
