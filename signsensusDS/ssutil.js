@@ -157,6 +157,7 @@ exports.dumpObjectForHashing = function(obj){
 
 
 exports.hashValues  = function (values){
+    const crypto = require('crypto');
     const hash = crypto.createHash('sha256');
     var result = exports.dumpObjectForHashing(values);
     hash.update(result);
