@@ -1,8 +1,6 @@
 /*
  SignSens helper functions
  */
-const crypto = require('crypto');
-
 exports.wipeOutsidePayload = function wipeOutsidePayload(hashStringHexa, pos, size){
     var result;
     var sz = hashStringHexa.length;
@@ -65,7 +63,7 @@ exports.generatePosHashXTimes = function generatePosHashXTimes(buffer, pos, size
 
     /*if(pos != -1 )
         result[pos] = 0; */
-
+    const crypto = require('crypto');
     for(var i = 0; i < count; i++){
         var hash = crypto.createHash('sha256');
         result = exports.wipeOutsidePayload(result, pos, size);
@@ -76,7 +74,7 @@ exports.generatePosHashXTimes = function generatePosHashXTimes(buffer, pos, size
 }
 
 exports.hashStringArray = function (counter, arr, payloadSize){
-
+    const crypto = require('crypto');
     const hash = crypto.createHash('sha256');
     var result = counter.toString(16);
 
