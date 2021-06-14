@@ -1,6 +1,6 @@
 const ecies = require('../ecies')
 const crypto = require('crypto')
-const curveName = require('../crypto').params.curveName;
+const curveName = require('../config').curveName;
 
 const NS_PER_SEC = 1e9;
 const msgNo = 500
@@ -14,7 +14,7 @@ for (i = 0; i < msgNo ; ++i) {
 encArray = new Array(msgNo)
 
 let bobECDH = crypto.createECDH(curveName)
-let bobECDHPublicKey = bobECDH.generateKeys(); 
+let bobECDHPublicKey = bobECDH.generateKeys();
 let bobECDHPrivateKey = bobECDH.getPrivateKey();
 
 // Start with encyptions

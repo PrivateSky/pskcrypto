@@ -1,6 +1,6 @@
 const ecies = require('../ecies-doa-kmac')
 const crypto = require('crypto')
-const curveName = require('../crypto').params.curveName;
+const curveName = require('../config').curveName;
 
 const NS_PER_SEC = 1e9;
 const msgNo = 500
@@ -15,14 +15,14 @@ encArray = new Array(msgNo)
 
 
 let aliceECDH = crypto.createECDH(curveName)
-let aliceECDHPublicKey = aliceECDH.generateKeys(); 
+let aliceECDHPublicKey = aliceECDH.generateKeys();
 let aliceECDHPrivateKey = aliceECDH.getPrivateKey();
 let aliceECDHKeyPair = {
     publicKey: aliceECDHPublicKey,
     privateKey: aliceECDHPrivateKey
 }
 let bobECDH = crypto.createECDH(curveName)
-let bobECDHPublicKey = bobECDH.generateKeys(); 
+let bobECDHPublicKey = bobECDH.generateKeys();
 let bobECDHPrivateKey = bobECDH.getPrivateKey();
 
 // Start with encyptions

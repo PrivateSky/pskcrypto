@@ -1,10 +1,15 @@
 'use strict';
 
 const crypto = require('crypto');
-const config = require('./private_config');
+const config = require('../config');
 
-function computeDigitalSignature(privateECSigningKey, buffer) {
-    let encodingFormat = require('./index').encodingFormat;
+function computeDigitalSignature(privateECSigningKey, buffer, options) {
+    options = options || {};
+    const defaultOpts = config;
+    Object.assign(defaultOpts, options);
+    options = defaultOpts;
+
+    let encodingFormat = options.encodingFormat;
     let signObject = crypto.createSign(config.signAlgoName)
     signObject.update(buffer)
     signObject.end();
@@ -12,8 +17,13 @@ function computeDigitalSignature(privateECSigningKey, buffer) {
 
 }
 
-function verifyDigitalSignature(publicECVerificationKey, signature, buffer) {
-    let verifyObject = crypto.createVerify(config.signAlgoName)
+function verifyDigitalSignature(publicECVerificationKey, signature, buffer, options) {
+    options = options || {};
+    const defaultOpts = config;
+    Object.assign(defaultOpts, options);
+    options = defaultOpts;
+
+    let verifyObject = crypto.createVerify(options.signAlgoName)
     verifyObject.update(buffer)
     verifyObject.end()
     return verifyObject.verify(publicECVerificationKey, signature)

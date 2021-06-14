@@ -2,6 +2,7 @@
 
 const mycrypto = require('../crypto');
 const common = require('../common')
+const config = require('../config')
 
 function checkWrappedMessageMandatoryProperties(wrappedMessage) {
     const mandatoryProperties = ["from_ecdh", "msg"];
@@ -12,35 +13,40 @@ function checkWrappedMessageMandatoryProperties(wrappedMessage) {
     })
 }
 
-module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope) {
+module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope, options) {
+    options = options || {};
+    const defaultOpts = config;
+    Object.assign(defaultOpts, options);
+    options = defaultOpts;
+
     common.checkEncryptedEnvelopeMandatoryProperties(encEnvelope)
 
-    const ephemeralPublicKey = mycrypto.PublicKeyDeserializer.deserializeECDHPublicKey(encEnvelope.r)
-    
-    const ephemeralKeyAgreement = new mycrypto.ECEphemeralKeyAgreement()
+    const ephemeralPublicKey = mycrypto.PublicKeyDeserializer.deserializeECDHPublicKey(encEnvelope.r, options)
+
+    const ephemeralKeyAgreement = new mycrypto.ECEphemeralKeyAgreement(options)
     const sharedSecret = ephemeralKeyAgreement.computeSharedSecretFromKeyPair(receiverECDHPrivateKey, ephemeralPublicKey)
 
     const kdfInput = common.computeKDFInput(ephemeralPublicKey, sharedSecret)
-    const { symmetricEncryptionKey, macKey } = common.computeSymmetricEncAndMACKeys(kdfInput)
+    const { symmetricEncryptionKey, macKey } = common.computeSymmetricEncAndMACKeys(kdfInput, options)
 
-    const ciphertext = Buffer.from(encEnvelope.ct, mycrypto.encodingFormat)
-    const tag = Buffer.from(encEnvelope.tag, mycrypto.encodingFormat)
-    const iv = Buffer.from(encEnvelope.iv, mycrypto.encodingFormat)
+    const ciphertext = Buffer.from(encEnvelope.ct, options.encodingFormat)
+    const tag = Buffer.from(encEnvelope.tag, options.encodingFormat)
+    const iv = Buffer.from(encEnvelope.iv, options.encodingFormat)
 
-    const wrappedMessageObject = JSON.parse(mycrypto.symmetricDecrypt(symmetricEncryptionKey, ciphertext, iv).toString())
+    const wrappedMessageObject = JSON.parse(mycrypto.symmetricDecrypt(symmetricEncryptionKey, ciphertext, iv, options).toString())
     checkWrappedMessageMandatoryProperties(wrappedMessageObject)
-    const senderPublicKey = mycrypto.PublicKeyDeserializer.deserializeECDHPublicKey(wrappedMessageObject.from_ecdh)
+    const senderPublicKey = mycrypto.PublicKeyDeserializer.deserializeECDHPublicKey(wrappedMessageObject.from_ecdh, options);
 
-    const senderKeyAgreement = new mycrypto.ECEphemeralKeyAgreement()
+    const senderKeyAgreement = new mycrypto.ECEphemeralKeyAgreement(options)
     const senderDerivedSharedSecret = senderKeyAgreement.computeSharedSecretFromKeyPair(receiverECDHPrivateKey, senderPublicKey)
     // **TODO**: This does not seem correct, need to think about it.
     mycrypto.KMAC.verifyKMAC(tag, macKey,
         Buffer.concat([ciphertext, iv, senderDerivedSharedSecret],
-            ciphertext.length + iv.length + senderDerivedSharedSecret.length)
+            ciphertext.length + iv.length + senderDerivedSharedSecret.length), options
     )
 
     return {
         from_ecdh: senderPublicKey,
-        message: Buffer.from(wrappedMessageObject.msg, mycrypto.encodingFormat)
+        message: Buffer.from(wrappedMessageObject.msg, options.encodingFormat)
     };
 }

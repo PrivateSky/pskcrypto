@@ -104,7 +104,7 @@ In the following, we elaborate on the concrete meaning of all these options.
 - #### **Returns**:  A boolean value indicating whether the input signature is valid (`true`), or not (`false`).
 <br>
 
-We note that functions related to digital signatures, by default, employ the SHA-2-256 hash function (refer to `crypto/private_config.js` for a complete list of cryptographic parameters).
+We note that functions related to digital signatures, by default, employ the SHA-2-256 hash function (refer to `config.js.js` for a complete list of cryptographic parameters).
 <br>
 
 >### symmetricEncrypt(key, plaintext, iv)
@@ -223,7 +223,7 @@ If you are interested in just using this version of the implementation, without 
 const ecies = require('./ecies-doa-ds'); //import the ECIES module
 const assert = require('assert').strict;
 const crypto = require('crypto'); //import the default crypto module so that we can generate keys
-const curveName = require('./crypto').params.curveName; //get the default named curve
+const curveName = require("./config").curveName; //get the default named curve
 
 // The message we want to transmit, as a Buffer, which is what the encrypt() function expects
 const plainTextMessage = Buffer.from('hello world');
@@ -237,7 +237,7 @@ let aliceECSigningKeyPair = crypto.generateKeyPairSync(
 )
 // Generate Bob's ECDH key pair (message receiver)
 let bobECDH = crypto.createECDH(curveName)
-let bobECDHPublicKey = bobECDH.generateKeys(); 
+let bobECDHPublicKey = bobECDH.generateKeys();
 let bobECDHPrivateKey = bobECDH.getPrivateKey();
 
 // Encrypt the message. The function returns a JSON object that you can send over any communication
@@ -331,14 +331,14 @@ If you are interested in just using this version of the implementation, without 
 const ecies = require('./ecies'); //import the ECIES module
 const assert = require('assert').strict;
 const crypto = require('crypto'); //import the default crypto module so that we can generate keys
-const curveName = require('./crypto').params.curveName; //get the default named curve
+const curveName = require("./config").curveName; //get the default named curve
 
 // The message we want to transmit, as a Buffer, which is what the encrypt() function expects
 const plainTextMessage = Buffer.from('hello world');
 
 // Generate Bob's ECDH key pair (message receiver)
 let bobECDH = crypto.createECDH(curveName)
-let bobECDHPublicKey = bobECDH.generateKeys(); 
+let bobECDHPublicKey = bobECDH.generateKeys();
 let bobECDHPrivateKey = bobECDH.getPrivateKey();
 
 // Encrypt the message. The function returns a JSON object that you can send over any communication

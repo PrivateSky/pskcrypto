@@ -1,23 +1,24 @@
 const crypto = require('crypto')
 const mycrypto = require('../crypto')
+const config = require('../config')
 
 const NS_PER_SEC = 1e9;
 const iterations = 1000
 
 let message = crypto.pseudoRandomBytes(32)
 
-let aliceECDH = crypto.createECDH(mycrypto.params.curveName)
+let aliceECDH = crypto.createECDH(config.curveName)
 aliceECDH.generateKeys()
 let aliceECDHPrivateKey = aliceECDH.getPrivateKey()
 let aliceECSigningKeyPair = crypto.generateKeyPairSync(
     'ec',
     {
-        namedCurve: mycrypto.params.curveName
+        namedCurve: config.curveName
     }
 )
 // Generate Bob's ECDH key pair (message receiver)
-let bobECDH = crypto.createECDH(mycrypto.params.curveName)
-let bobECDHPublicKey = bobECDH.generateKeys(); 
+let bobECDH = crypto.createECDH(config.curveName)
+let bobECDHPublicKey = bobECDH.generateKeys();
 
 var startTime = process.hrtime();
 for (i = 0 ; i < iterations ; ++i) {
@@ -29,7 +30,7 @@ var ecdhTimeSecs = (totalHRTime[0]* NS_PER_SEC + totalHRTime[1]) / NS_PER_SEC
 
 var startTime = process.hrtime();
 for (i = 0 ; i < iterations ; ++i) {
-    mycrypto.computeDigitalSignature(aliceECSigningKeyPair.privateKey, message)
+    mycrypto.computeDigitalSignature(aliceECSigningKeyPair.privateKey, message, config)
 }
 var totalHRTime = process.hrtime(startTime);
 var ecdsaTimeSecs = (totalHRTime[0]* NS_PER_SEC + totalHRTime[1]) / NS_PER_SEC

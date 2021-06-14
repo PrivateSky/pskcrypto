@@ -1,19 +1,30 @@
 'use strict';
 
 const crypto = require('crypto')
+const config = require('../config');
 
 function PublicKeyDeserializer() {
-    this.deserializeECDHPublicKey = (ecdhPublicKeySerialized) => {
-        let encodingFormat = require('../crypto').encodingFormat;
+    this.deserializeECDHPublicKey = (ecdhPublicKeySerialized, options) => {
+        options = options || {};
+        const defaultOpts = config;
+        Object.assign(defaultOpts, options);
+        options = defaultOpts;
+
+        let encodingFormat = options.encodingFormat;
         return Buffer.from(ecdhPublicKeySerialized, encodingFormat)
     }
 
-    this.deserializeECSigVerPublicKey = (ecSigVerPublicKeySerialized) => {
-        let encodingFormat = require('../crypto').encodingFormat;
+    this.deserializeECSigVerPublicKey = (ecSigVerPublicKeySerialized, options) => {
+        options = options || {};
+        const defaultOpts = config;
+        Object.assign(defaultOpts, options);
+        options = defaultOpts;
+
+        let encodingFormat = options.encodingFormat;
         return crypto.createPublicKey({
             key: Buffer.from(ecSigVerPublicKeySerialized, encodingFormat),
-            format: 'der',
-            type: 'spki'
+            format: options.publicKeyFormat,
+            type: options.publicKeyType
         })
     }
 

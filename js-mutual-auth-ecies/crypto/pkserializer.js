@@ -1,18 +1,26 @@
-'use strict';
-
+const config = require('../config');
 
 function PublicKeySerializer() {
+    this.serializeECDHPublicKey = (ecdhPublicKey, options) => {
+        options = options || {};
+        const defaultOpts =  config;
+        Object.assign(defaultOpts, options);
+        options = defaultOpts;
 
-    this.serializeECDHPublicKey = (ecdhPublicKey) => {
-        let encodingFormat = require('../crypto').encodingFormat;
+        let encodingFormat = options.encodingFormat;
         return ecdhPublicKey.toString(encodingFormat);
     }
 
-    this.serializeECSigVerPublicKey = (ecSigVerPublicKey) => {
-        let encodingFormat = require('../crypto').encodingFormat;
+    this.serializeECSigVerPublicKey = (ecSigVerPublicKey, options) => {
+        options = options || {};
+        const defaultOpts = config;
+        Object.assign(defaultOpts, options);
+        options = defaultOpts;
+
+        let encodingFormat = options.encodingFormat;
         return ecSigVerPublicKey.export({
-            type: 'spki',
-            format: 'der'
+            type: options.publicKeyType,
+            format: options.publicKeyFormat
         }).toString(encodingFormat)
     }
 }

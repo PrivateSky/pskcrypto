@@ -1,7 +1,7 @@
-const ecies = require('./ecies-ge-doa') //import the ECIES module
+const ecies = require('./ecies-group-encryption/ecies-ge-anon') //import the ECIES module
 const assert = require('assert').strict;
 const crypto = require('crypto'); //import the default crypto module so that we can generate keys
-const curveName = require('./lib/crypto').params.curveName; //get the default named curve
+const curveName = require('./config').curveName; //get the default named curve
 
 // The message we want to transmit, as a Buffer, which is what the encrypt() function expects
 const plainTextMessage = Buffer.from('hello world');
@@ -18,15 +18,8 @@ for(let i = 0; i < totalReceivers; i++) {
         privateKey: curReceiverECDH.getPrivateKey()
     })
 }
-// Generate Alice's EC signing key pair (message sender)
-let aliceECSigningKeyPair = crypto.generateKeyPairSync(
-    'ec',
-    {
-        namedCurve: curveName
-    }
-)
 // Encrypt the message for all the intended recipients
-let encEnvelope = ecies.encrypt(aliceECSigningKeyPair, plainTextMessage, ...receiverECDHPublicKeyArray)
+let encEnvelope = ecies.encrypt(plainTextMessage, ...receiverECDHPublicKeyArray);
 console.log('Encrypted Envelope:')
 console.log(encEnvelope)
 
@@ -34,15 +27,15 @@ console.log(encEnvelope)
 // ... Each recipient receives the encrypted envelope
 
 // Get all the ECDH public keys for which this message was encrypted for
-let decodedRecipientECDHPublicKeyArray = ecies.getRecipientECDHPublicKeysFromEncEnvelope(encEnvelope)
+let decodedRecipientECDHPublicKeyArray = ecies.getRecipientECDHPublicKeysFromEncEnvelope(encEnvelope, require("./config"))
 // ... each receiver here should attempt to find her corresponding ECDH private key
 // ... if no corresponding private key is found, the receiver should throw the message away
-let decEnvelope;
+let decMessage;
 // We now decrypt with each recipient's ECDH key pair
 for(let i = 0 ; i < totalReceivers ; i++) {
-    decEnvelope = ecies.decrypt(receiverECDHKeyPairArray[i], encEnvelope)
-    assert(Buffer.compare(decEnvelope.message, plainTextMessage) === 0, "MESSAGES ARE NOT EQUAL")
+    decMessage = ecies.decrypt(receiverECDHKeyPairArray[i], encEnvelope)
+    assert(Buffer.compare(decMessage, plainTextMessage) === 0, "MESSAGES ARE NOT EQUAL")
 }
 // Here is the decrypted message!
-console.log('Decrypted message is: ' + decEnvelope.message);
+console.log('Decrypted message is: ' + decMessage);
 

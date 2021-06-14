@@ -1,14 +1,14 @@
 const ecies = require('./ecies'); //import the ECIES module
 const assert = require('assert').strict;
 const crypto = require('crypto'); //import the default crypto module so that we can generate keys
-const curveName = require('./crypto').params.curveName; //get the default named curve
+const curveName = require("./config").curveName; //get the default named curve
 
 // The message we want to transmit, as a Buffer, which is what the encrypt() function expects
 const plainTextMessage = Buffer.from('hello world');
 
 // Generate Bob's ECDH key pair (message receiver)
 let bobECDH = crypto.createECDH(curveName)
-let bobECDHPublicKey = bobECDH.generateKeys(); 
+let bobECDHPublicKey = bobECDH.generateKeys();
 let bobECDHPrivateKey = bobECDH.getPrivateKey();
 
 // Encrypt the message. The function returns a JSON object that you can send over any communication

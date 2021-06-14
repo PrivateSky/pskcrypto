@@ -1,6 +1,6 @@
 const ecies = require('../ecies-doa-ds')
 const crypto = require('crypto')
-const curveName = require('../crypto').params.curveName;
+const curveName = require('../config').curveName;
 
 
 const NS_PER_SEC = 1e9;
@@ -22,7 +22,7 @@ let aliceECSigningKeyPair = crypto.generateKeyPairSync(
     }
 )
 let bobECDH = crypto.createECDH(curveName)
-let bobECDHPublicKey = bobECDH.generateKeys(); 
+let bobECDHPublicKey = bobECDH.generateKeys();
 let bobECDHPrivateKey = bobECDH.getPrivateKey();
 
 // Start with encyptions

@@ -1,12 +1,17 @@
 'use strict';
 
 const crypto = require('crypto');
+const config = require('../config');
 
 class ECEphemeralKeyAgreement {
 
-    constructor() {
-        let curveName = require('./index').params.curveName;
-        this.ecdh = crypto.createECDH(curveName);
+    constructor(options) {
+        options = options || {};
+        const defaultOpts = config;
+        Object.assign(defaultOpts, options);
+        options = defaultOpts;
+
+        this.ecdh = crypto.createECDH(options.curveName);
     }
 
     generateEphemeralPublicKey = () => {

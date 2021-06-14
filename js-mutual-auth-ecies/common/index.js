@@ -1,6 +1,7 @@
 'use strict';
 
 const mycrypto = require('../crypto')
+const config = require('../config')
 
 // Prevent benign malleability
 function computeKDFInput(ephemeralPublicKey, sharedSecret) {
@@ -8,10 +9,10 @@ function computeKDFInput(ephemeralPublicKey, sharedSecret) {
         ephemeralPublicKey.length + sharedSecret.length)
 }
 
-function computeSymmetricEncAndMACKeys(kdfInput) {
-    let kdfKey = mycrypto.KDF(kdfInput, mycrypto.params.symmetricCipherKeySize + mycrypto.params.macKeySize)
-    const symmetricEncryptionKey = kdfKey.slice(0, mycrypto.params.symmetricCipherKeySize);
-    const macKey = kdfKey.slice(mycrypto.params.symmetricCipherKeySize)
+function computeSymmetricEncAndMACKeys(kdfInput, options) {
+    let kdfKey = mycrypto.KDF(kdfInput, options.symmetricCipherKeySize + options.macKeySize, options.hashFunctionName, options.hashSize)
+    const symmetricEncryptionKey = kdfKey.slice(0, options.symmetricCipherKeySize);
+    const macKey = kdfKey.slice(options.symmetricCipherKeySize)
     return {
         symmetricEncryptionKey,
         macKey
@@ -34,13 +35,13 @@ function checkEncryptedEnvelopeMandatoryProperties(encryptedEnvelope) {
     })
 }
 
-function createEncryptedEnvelopeObject(receiverECDHPublicKey, ephemeralECDHPublicKey, ciphertext, iv, tag) {
+function createEncryptedEnvelopeObject(receiverECDHPublicKey, ephemeralECDHPublicKey, ciphertext, iv, tag, options) {
     return {
-        to_ecdh: mycrypto.PublicKeySerializer.serializeECDHPublicKey(receiverECDHPublicKey),
-        r: mycrypto.PublicKeySerializer.serializeECDHPublicKey(ephemeralECDHPublicKey),
-        ct: ciphertext.toString(mycrypto.encodingFormat),
-        iv: iv.toString(mycrypto.encodingFormat),
-        tag: tag.toString(mycrypto.encodingFormat)
+        to_ecdh: mycrypto.PublicKeySerializer.serializeECDHPublicKey(receiverECDHPublicKey, options),
+        r: mycrypto.PublicKeySerializer.serializeECDHPublicKey(ephemeralECDHPublicKey, options),
+        ct: ciphertext.toString(options.encodingFormat),
+        iv: iv.toString(options.encodingFormat),
+        tag: tag.toString(options.encodingFormat)
     }
 }
 
