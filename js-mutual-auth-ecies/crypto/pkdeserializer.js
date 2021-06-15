@@ -11,7 +11,7 @@ function PublicKeyDeserializer() {
         options = defaultOpts;
 
         let encodingFormat = options.encodingFormat;
-        return Buffer.from(ecdhPublicKeySerialized, encodingFormat)
+        return $$.Buffer.from(ecdhPublicKeySerialized, encodingFormat)
     }
 
     this.deserializeECSigVerPublicKey = (ecSigVerPublicKeySerialized, options) => {
@@ -22,7 +22,7 @@ function PublicKeyDeserializer() {
 
         let encodingFormat = options.encodingFormat;
         return crypto.createPublicKey({
-            key: Buffer.from(ecSigVerPublicKeySerialized, encodingFormat),
+            key: $$.Buffer.from(ecSigVerPublicKeySerialized, encodingFormat),
             format: options.publicKeyFormat,
             type: options.publicKeyType
         })

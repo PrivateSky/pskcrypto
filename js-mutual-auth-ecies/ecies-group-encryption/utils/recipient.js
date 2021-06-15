@@ -14,7 +14,7 @@ module.exports.getRecipientECDHPublicKeysFromEncEnvelope = function (encEnvelope
     if (encEnvelope.recvs === undefined) {
         throw new Error('Mandatory property recvs not found in encrypted envelope')
     }
-    let multiRecipientECIESEnvelopeArray = JSON.parse(Buffer.from(encEnvelope.recvs, options.encodingFormat))
+    let multiRecipientECIESEnvelopeArray = JSON.parse($$.Buffer.from(encEnvelope.recvs, options.encodingFormat))
     if (multiRecipientECIESEnvelopeArray.length === 0) {
         throw new Error('Invalid receiver array in encrypted envelope')
     }
@@ -31,8 +31,8 @@ module.exports.getRecipientECDHPublicKeysFromEncEnvelope = function (encEnvelope
 }
 
 function isECIESEnvelopeForInputECDHPublicKey(eciesEnvelope, ecdhPublicKey, options) {
-    const ecdhPublicKeyBuffer = Buffer.from(mycrypto.PublicKeySerializer.serializeECDHPublicKey(ecdhPublicKey, options))
-    const envelopeECDHPublicKey = Buffer.from(eciesEnvelope.to_ecdh)
+    const ecdhPublicKeyBuffer = $$.Buffer.from(mycrypto.PublicKeySerializer.serializeECDHPublicKey(ecdhPublicKey, options))
+    const envelopeECDHPublicKey = $$.Buffer.from(eciesEnvelope.to_ecdh)
     return mycrypto.timingSafeEqual(envelopeECDHPublicKey, ecdhPublicKeyBuffer);
 }
 

@@ -19,8 +19,9 @@ module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope, options)
     Object.assign(defaultOpts, options);
     options = defaultOpts;
     common.checkEncryptedEnvelopeMandatoryProperties(encEnvelope)
+    receiverECDHPrivateKey = common.convertKeysToKeyObjects(receiverECDHPrivateKey, "private");
 
-    const ephemeralPublicKey = Buffer.from(encEnvelope.r, options.encodingFormat)
+    const ephemeralPublicKey = $$.Buffer.from(encEnvelope.r, options.encodingFormat)
 
     const ephemeralKeyAgreement = new mycrypto.ECEphemeralKeyAgreement(options)
     const sharedSecret = ephemeralKeyAgreement.computeSharedSecretFromKeyPair(receiverECDHPrivateKey, ephemeralPublicKey)
@@ -28,13 +29,13 @@ module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope, options)
     const kdfInput = common.computeKDFInput(ephemeralPublicKey, sharedSecret)
     const { symmetricEncryptionKey, macKey } = common.computeSymmetricEncAndMACKeys(kdfInput, options)
 
-    const ciphertext = Buffer.from(encEnvelope.ct, options.encodingFormat)
-    const tag = Buffer.from(encEnvelope.tag, options.encodingFormat)
-    const iv = Buffer.from(encEnvelope.iv, options.encodingFormat)
+    const ciphertext = $$.Buffer.from(encEnvelope.ct, options.encodingFormat)
+    const tag = $$.Buffer.from(encEnvelope.tag, options.encodingFormat)
+    const iv = $$.Buffer.from(encEnvelope.iv, options.encodingFormat)
 
     if (!mycrypto.KMAC.verifyKMAC(tag,
         macKey,
-        Buffer.concat([ciphertext, iv],
+        $$.Buffer.concat([ciphertext, iv],
             ciphertext.length + iv.length), options)
     ) {
         throw new Error("Bad MAC")
@@ -45,12 +46,12 @@ module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope, options)
     const senderECSigVerPublicKey = mycrypto.PublicKeyDeserializer.deserializeECSigVerPublicKey(wrappedMessageObject.from_ecsig)
 
     if (!mycrypto.verifyDigitalSignature(senderECSigVerPublicKey,
-        Buffer.from(wrappedMessageObject.sig, options.encodingFormat),
+        $$.Buffer.from(wrappedMessageObject.sig, options.encodingFormat),
         sharedSecret, options)) {
         throw new Error("Bad signature")
     }
     return {
         from_ecsig: senderECSigVerPublicKey,
-        message: Buffer.from(wrappedMessageObject.msg, options.encodingFormat)
+        message: $$.Buffer.from(wrappedMessageObject.msg, options.encodingFormat)
     };
 }

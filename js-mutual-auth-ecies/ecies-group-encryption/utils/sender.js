@@ -18,7 +18,7 @@ module.exports.generateKeyBufferParams = function (options) {
 module.exports.senderMultiRecipientECIESEncrypt = function(message, ...receiverECDHPublicKeyArray) {
     let options;
     const lastArg = receiverECDHPublicKeyArray[receiverECDHPublicKeyArray.length - 1];
-    if (typeof lastArg === "object" && !Array.isArray(lastArg) && !Buffer.isBuffer(lastArg) && !(lastArg instanceof Uint8Array)) {
+    if (typeof lastArg === "object" && !Array.isArray(lastArg) && !$$.Buffer.isBuffer(lastArg) && !(lastArg instanceof Uint8Array)) {
         options = receiverECDHPublicKeyArray.pop();
     } else {
         options = {};
@@ -32,5 +32,5 @@ module.exports.senderMultiRecipientECIESEncrypt = function(message, ...receiverE
     receiverECDHPublicKeyArray.forEach(function (curReceiverECDHPublicKey) {
         eciesInstancesArray.push(ecies.encrypt(curReceiverECDHPublicKey, message, options))
     })
-    return Buffer.from(JSON.stringify(eciesInstancesArray))
+    return $$.Buffer.from(JSON.stringify(eciesInstancesArray))
 }

@@ -17,11 +17,21 @@ module.exports.encrypt = function (senderECDHKeyPair, receiverECDHPublicKey, mes
     Object.assign(defaultOpts, options);
     options = defaultOpts;
 
-    if (!Buffer.isBuffer(message)) {
-        throw new Error('Input message has to be of type Buffer')
+    if (typeof message === "object" && !$$.Buffer.isBuffer(message)) {
+        message = JSON.stringify(message);
     }
 
+    if (typeof message === "string") {
+        message = $$.Buffer.from(message);
+    }
+
+    if (!$$.Buffer.isBuffer(message)) {
+        throw new Error('Input message has to be of type Buffer');
+    }
     common.checkKeyPairMandatoryProperties(senderECDHKeyPair)
+    senderECDHKeyPair.privateKey = common.convertKeysToKeyObjects(senderECDHKeyPair.privateKey, "private");
+    senderECDHKeyPair.publicKey = common.convertKeysToKeyObjects(senderECDHKeyPair.publicKey, "public");
+    receiverECDHPublicKey = common.convertKeysToKeyObjects(receiverECDHPublicKey, "public");
 
     const senderKeyAgreement = new mycrypto.ECEphemeralKeyAgreement(options)
     const senderDerivedSharedSecret = senderKeyAgreement.computeSharedSecretFromKeyPair(senderECDHKeyPair.privateKey, receiverECDHPublicKey)
@@ -39,7 +49,7 @@ module.exports.encrypt = function (senderECDHKeyPair, receiverECDHPublicKey, mes
     const ciphertext = mycrypto.symmetricEncrypt(symmetricEncryptionKey, senderAuthMsgEnvelopeSerialized, iv, options)
     // **TODO**: This does not seem correct, need to think about it.
     const tag = mycrypto.KMAC.computeKMAC(macKey,
-        Buffer.concat([ciphertext, iv, senderDerivedSharedSecret],
+        $$.Buffer.concat([ciphertext, iv, senderDerivedSharedSecret],
             ciphertext.length + iv.length + senderDerivedSharedSecret.length), options
     )
 

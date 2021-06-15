@@ -23,11 +23,22 @@ module.exports.encrypt = function (senderECSigningKeyPair, receiverECDHPublicKey
     Object.assign(defaultOpts, options);
     options = defaultOpts;
 
-    if (!Buffer.isBuffer(message)) {
-        throw new Error('Input message has to be of type Buffer')
+    if (typeof message === "object" && !$$.Buffer.isBuffer(message)) {
+        message = JSON.stringify(message);
+    }
+
+    if (typeof message === "string") {
+        message = $$.Buffer.from(message);
+    }
+
+    if (!$$.Buffer.isBuffer(message)) {
+        throw new Error('Input message has to be of type Buffer');
     }
 
     common.checkKeyPairMandatoryProperties(senderECSigningKeyPair)
+    senderECSigningKeyPair.privateKey = common.convertKeysToKeyObjects(senderECSigningKeyPair.privateKey, "private");
+    senderECSigningKeyPair.publicKey = common.convertKeysToKeyObjects(senderECSigningKeyPair.publicKey, "public");
+    receiverECDHPublicKey = common.convertKeysToKeyObjects(receiverECDHPublicKey, "public");
 
     const ephemeralKeyAgreement = new mycrypto.ECEphemeralKeyAgreement(options)
     const ephemeralPublicKey = ephemeralKeyAgreement.generateEphemeralPublicKey()
@@ -42,7 +53,7 @@ module.exports.encrypt = function (senderECSigningKeyPair, receiverECDHPublicKey
     const iv = mycrypto.getRandomBytes(options.ivSize)
     const ciphertext = mycrypto.symmetricEncrypt(symmetricEncryptionKey, senderAuthMsgEnvelopeSerialized, iv, options)
     const tag = mycrypto.KMAC.computeKMAC(macKey,
-        Buffer.concat([ciphertext, iv],
+        $$.Buffer.concat([ciphertext, iv],
             ciphertext.length + iv.length), options
     )
 

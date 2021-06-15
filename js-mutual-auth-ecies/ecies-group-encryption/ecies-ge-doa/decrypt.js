@@ -22,6 +22,8 @@ module.exports.decrypt = function (receiverECDHKeyPair, encEnvelope, options) {
 
     checkEncryptedEnvelopeMandatoryProperties(encEnvelope)
     common.checkKeyPairMandatoryProperties(receiverECDHKeyPair)
+    receiverECDHKeyPair.privateKey = common.convertKeysToKeyObjects(receiverECDHKeyPair.privateKey, "private");
+    receiverECDHKeyPair.publicKey = common.convertKeysToKeyObjects(receiverECDHKeyPair.publicKey, "public");
 
     let tempGEAnonEnvelope = Object.assign({}, encEnvelope)
     delete tempGEAnonEnvelope.from_ecsig;
@@ -31,12 +33,12 @@ module.exports.decrypt = function (receiverECDHKeyPair, encEnvelope, options) {
 
     const senderECSigVerPublicKey = mycrypto.PublicKeyDeserializer.deserializeECSigVerPublicKey(encEnvelope.from_ecsig, options)
 
-    const recvsTagBuffer = Buffer.from(encEnvelope.rtag, options.encodingFormat)
-    const tagBuffer = Buffer.from(encEnvelope.tag, options.encodingFormat)
-    const signature = Buffer.from(encEnvelope.sig, options.encodingFormat)
+    const recvsTagBuffer = $$.Buffer.from(encEnvelope.rtag, options.encodingFormat)
+    const tagBuffer = $$.Buffer.from(encEnvelope.tag, options.encodingFormat)
+    const signature = $$.Buffer.from(encEnvelope.sig, options.encodingFormat)
     if (!mycrypto.verifyDigitalSignature(senderECSigVerPublicKey,
         signature,
-        Buffer.concat([recvsTagBuffer, tagBuffer],
+        $$.Buffer.concat([recvsTagBuffer, tagBuffer],
             recvsTagBuffer.length + tagBuffer.length), options)
     ) {
         throw new Error("Bad signature")

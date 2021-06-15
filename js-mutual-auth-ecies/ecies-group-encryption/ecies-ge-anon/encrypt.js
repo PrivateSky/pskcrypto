@@ -7,7 +7,7 @@ const config = require('../../config')
 module.exports.encrypt = function (message, ...receiverECDHPublicKeys) {
     let options;
     const lastArg = receiverECDHPublicKeys[receiverECDHPublicKeys.length - 1];
-    if (typeof lastArg === "object" && !Array.isArray(lastArg) && !Buffer.isBuffer(lastArg) && !(lastArg instanceof Uint8Array)) {
+    if (typeof lastArg === "object" && !Array.isArray(lastArg) && !$$.Buffer.isBuffer(lastArg) && !(lastArg instanceof Uint8Array)) {
         options = receiverECDHPublicKeys.pop();
     } else {
         options = {};
@@ -17,8 +17,16 @@ module.exports.encrypt = function (message, ...receiverECDHPublicKeys) {
     Object.assign(defaultOpts, options);
     options = defaultOpts;
 
-    if (!Buffer.isBuffer(message)) {
-        throw new Error('Input message has to be of type Buffer')
+    if (typeof message === "object" && !$$.Buffer.isBuffer(message)) {
+        message = JSON.stringify(message);
+    }
+
+    if (typeof message === "string") {
+        message = $$.Buffer.from(message);
+    }
+
+    if (!$$.Buffer.isBuffer(message)) {
+        throw new Error('Input message has to be of type Buffer');
     }
 
     if (receiverECDHPublicKeys.length === 0) {
@@ -28,14 +36,14 @@ module.exports.encrypt = function (message, ...receiverECDHPublicKeys) {
     receiverECDHPublicKeys.push(options);
     const { symmetricCipherKey, ciphertextMacKey, recvsMacKey } = utils.generateKeyBufferParams(options)
     const multiRecipientECIESBuffer = utils.senderMultiRecipientECIESEncrypt(
-        Buffer.concat([symmetricCipherKey, ciphertextMacKey, recvsMacKey],
+        $$.Buffer.concat([symmetricCipherKey, ciphertextMacKey, recvsMacKey],
             symmetricCipherKey.length + ciphertextMacKey.length + recvsMacKey.length),
         ...receiverECDHPublicKeys)
 
     const iv = mycrypto.getRandomBytes(options.ivSize)
     const ciphertext = mycrypto.symmetricEncrypt(symmetricCipherKey, message, iv, options)
     const tag = mycrypto.KMAC.computeKMAC(ciphertextMacKey,
-        Buffer.concat(
+        $$.Buffer.concat(
             [ciphertext, iv],
             ciphertext.length + iv.length), options
     );

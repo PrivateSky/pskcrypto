@@ -1,10 +1,10 @@
-const ecies = require('./ecies'); //import the ECIES module
+const ecies = require('../ecies'); //import the ECIES module
 const assert = require('assert').strict;
 const crypto = require('crypto'); //import the default crypto module so that we can generate keys
-const curveName = require("./config").curveName; //get the default named curve
+const curveName = require("../config").curveName; //get the default named curve
 
 // The message we want to transmit, as a Buffer, which is what the encrypt() function expects
-const plainTextMessage = Buffer.from('hello world');
+const plainTextMessage = $$.Buffer.from('hello world');
 
 // Generate Bob's ECDH key pair (message receiver)
 let bobECDH = crypto.createECDH(curveName)
@@ -23,9 +23,9 @@ console.log(encEnvelope)
 let myECDHPublicKey = ecies.getDecodedECDHPublicKeyFromEncEnvelope(encEnvelope)
 // ... Bob searches his key database for the corresponding ECDH private key
 // ... We assume here that Bob finds it
-assert(Buffer.compare(myECDHPublicKey, bobECDHPublicKey) === 0, "PUBLIC KEYS ARE NOT EQUAL")
+assert($$.Buffer.compare(myECDHPublicKey, bobECDHPublicKey) === 0, "PUBLIC KEYS ARE NOT EQUAL")
 // Bob calls the decryption function and gets back the message
 let decMessage = ecies.decrypt(bobECDHPrivateKey, encEnvelope)
-assert(Buffer.compare(decMessage, plainTextMessage) === 0, "MESSAGES ARE NOT EQUAL")
+assert($$.Buffer.compare(decMessage, plainTextMessage) === 0, "MESSAGES ARE NOT EQUAL")
 // Here is the decrypted message!
 console.log('Decrypted message is: ' + decMessage);

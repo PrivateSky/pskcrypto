@@ -2,10 +2,11 @@
 
 const mycrypto = require('../crypto')
 const config = require('../config')
+const crypto = require('crypto');
 
 // Prevent benign malleability
 function computeKDFInput(ephemeralPublicKey, sharedSecret) {
-    return Buffer.concat([ephemeralPublicKey, sharedSecret],
+    return $$.Buffer.concat([ephemeralPublicKey, sharedSecret],
         ephemeralPublicKey.length + sharedSecret.length)
 }
 
@@ -54,11 +55,49 @@ function checkKeyPairMandatoryProperties(keyPairObject) {
     })
 }
 
+function convertKeysToKeyObjects(keysArray, type) {
+    let createKey;
+    if (!type) {
+        type = "public";
+    }
+
+    if (type === "private") {
+        createKey = crypto.createPrivateKey;
+    }
+
+    if (type === "public") {
+        createKey = crypto.createPublicKey;
+    }
+
+    if (typeof createKey !== "function") {
+        throw Error(`The specified type is invalid.`);
+    }
+
+    if (!Array.isArray(keysArray)) {
+        keysArray = [keysArray];
+    }
+
+    const keyObjectsArr = keysArray.map(key => {
+        if (typeof key === "string") {
+            return createKey(key)
+        } else {
+            return key;
+        }
+    });
+
+    if (keyObjectsArr.length === 1) {
+        return keyObjectsArr[0];
+    }
+
+    return keyObjectsArr;
+}
+
 module.exports = {
     computeKDFInput,
     computeSymmetricEncAndMACKeys,
     getDecodedECDHPublicKeyFromEncEnvelope,
     checkEncryptedEnvelopeMandatoryProperties,
     createEncryptedEnvelopeObject,
-    checkKeyPairMandatoryProperties
+    checkKeyPairMandatoryProperties,
+    convertKeysToKeyObjects
 }

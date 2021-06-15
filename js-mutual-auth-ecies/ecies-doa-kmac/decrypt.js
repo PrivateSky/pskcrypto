@@ -20,6 +20,7 @@ module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope, options)
     options = defaultOpts;
 
     common.checkEncryptedEnvelopeMandatoryProperties(encEnvelope)
+    receiverECDHPrivateKey = common.convertKeysToKeyObjects(receiverECDHPrivateKey, "private");
 
     const ephemeralPublicKey = mycrypto.PublicKeyDeserializer.deserializeECDHPublicKey(encEnvelope.r, options)
 
@@ -29,9 +30,9 @@ module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope, options)
     const kdfInput = common.computeKDFInput(ephemeralPublicKey, sharedSecret)
     const { symmetricEncryptionKey, macKey } = common.computeSymmetricEncAndMACKeys(kdfInput, options)
 
-    const ciphertext = Buffer.from(encEnvelope.ct, options.encodingFormat)
-    const tag = Buffer.from(encEnvelope.tag, options.encodingFormat)
-    const iv = Buffer.from(encEnvelope.iv, options.encodingFormat)
+    const ciphertext = $$.Buffer.from(encEnvelope.ct, options.encodingFormat)
+    const tag = $$.Buffer.from(encEnvelope.tag, options.encodingFormat)
+    const iv = $$.Buffer.from(encEnvelope.iv, options.encodingFormat)
 
     const wrappedMessageObject = JSON.parse(mycrypto.symmetricDecrypt(symmetricEncryptionKey, ciphertext, iv, options).toString())
     checkWrappedMessageMandatoryProperties(wrappedMessageObject)
@@ -41,12 +42,12 @@ module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope, options)
     const senderDerivedSharedSecret = senderKeyAgreement.computeSharedSecretFromKeyPair(receiverECDHPrivateKey, senderPublicKey)
     // **TODO**: This does not seem correct, need to think about it.
     mycrypto.KMAC.verifyKMAC(tag, macKey,
-        Buffer.concat([ciphertext, iv, senderDerivedSharedSecret],
+        $$.Buffer.concat([ciphertext, iv, senderDerivedSharedSecret],
             ciphertext.length + iv.length + senderDerivedSharedSecret.length), options
     )
 
     return {
         from_ecdh: senderPublicKey,
-        message: Buffer.from(wrappedMessageObject.msg, options.encodingFormat)
+        message: $$.Buffer.from(wrappedMessageObject.msg, options.encodingFormat)
     };
 }

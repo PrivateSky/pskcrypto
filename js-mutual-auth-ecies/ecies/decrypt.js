@@ -12,6 +12,7 @@ module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope, options)
     options = defaultOpts;
 
     common.checkEncryptedEnvelopeMandatoryProperties(encEnvelope)
+    receiverECDHPrivateKey = common.convertKeysToKeyObjects(receiverECDHPrivateKey, "private");
 
     const ephemeralPublicKey = mycrypto.PublicKeyDeserializer.deserializeECDHPublicKey(encEnvelope.r, options)
 
@@ -21,13 +22,13 @@ module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope, options)
     const kdfInput = common.computeKDFInput(ephemeralPublicKey, sharedSecret)
     const { symmetricEncryptionKey, macKey } = common.computeSymmetricEncAndMACKeys(kdfInput, options)
 
-    const ciphertext = Buffer.from(encEnvelope.ct, options.encodingFormat)
-    const tag = Buffer.from(encEnvelope.tag, options.encodingFormat)
-    const iv = Buffer.from(encEnvelope.iv, options.encodingFormat)
+    const ciphertext = $$.Buffer.from(encEnvelope.ct, options.encodingFormat)
+    const tag = $$.Buffer.from(encEnvelope.tag, options.encodingFormat)
+    const iv = $$.Buffer.from(encEnvelope.iv, options.encodingFormat)
 
     if (!mycrypto.KMAC.verifyKMAC(tag,
         macKey,
-        Buffer.concat([ciphertext, iv],
+        $$.Buffer.concat([ciphertext, iv],
             ciphertext.length + iv.length), options)
     ) {
         throw new Error("Bad MAC")

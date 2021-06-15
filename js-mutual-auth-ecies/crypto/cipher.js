@@ -14,7 +14,7 @@ function symmetricEncrypt(key, plaintext, iv, options) {
     let cipher = crypto.createCipheriv(options.symmetricCipherName, key, iv);
     const firstChunk = cipher.update(plaintext);
     const secondChunk = cipher.final();
-    return Buffer.concat([firstChunk, secondChunk]);
+    return $$.Buffer.concat([firstChunk, secondChunk]);
 }
 
 function symmetricDecrypt(key, ciphertext, iv, options) {
@@ -27,7 +27,7 @@ function symmetricDecrypt(key, ciphertext, iv, options) {
     let cipher = crypto.createDecipheriv(options.symmetricCipherName, key, iv);
     const firstChunk = cipher.update(ciphertext);
     const secondChunk = cipher.final();
-    return Buffer.concat([firstChunk, secondChunk]);
+    return $$.Buffer.concat([firstChunk, secondChunk]);
 }
 
 module.exports = {
