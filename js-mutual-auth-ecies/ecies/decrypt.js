@@ -12,7 +12,6 @@ module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope, options)
     options = defaultOpts;
 
     common.checkEncryptedEnvelopeMandatoryProperties(encEnvelope)
-    receiverECDHPrivateKey = common.convertKeysToKeyObjects(receiverECDHPrivateKey, "private");
 
     const ephemeralPublicKey = mycrypto.PublicKeyDeserializer.deserializeECDHPublicKey(encEnvelope.r, options)
 

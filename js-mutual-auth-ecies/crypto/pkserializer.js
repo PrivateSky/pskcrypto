@@ -18,10 +18,9 @@ function PublicKeySerializer() {
         options = defaultOpts;
 
         let encodingFormat = options.encodingFormat;
-        return ecSigVerPublicKey.export({
-            type: options.publicKeyType,
-            format: options.publicKeyFormat
-        }).toString(encodingFormat)
+        const ecKeyGenerator = require("../../lib/ECKeyGenerator").createECKeyGenerator();
+        const derPublicKey = ecKeyGenerator.convertPublicKey(ecSigVerPublicKey, {originalFormat: "pem", outputFormat: "der", encodingFormat});
+        return derPublicKey.toString(encodingFormat)
     }
 }
 

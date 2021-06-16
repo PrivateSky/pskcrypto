@@ -36,9 +36,6 @@ module.exports.encrypt = function (senderECSigningKeyPair, receiverECDHPublicKey
     }
 
     common.checkKeyPairMandatoryProperties(senderECSigningKeyPair)
-    senderECSigningKeyPair.privateKey = common.convertKeysToKeyObjects(senderECSigningKeyPair.privateKey, "private");
-    senderECSigningKeyPair.publicKey = common.convertKeysToKeyObjects(senderECSigningKeyPair.publicKey, "public");
-    receiverECDHPublicKey = common.convertKeysToKeyObjects(receiverECDHPublicKey, "public");
 
     const ephemeralKeyAgreement = new mycrypto.ECEphemeralKeyAgreement(options)
     const ephemeralPublicKey = ephemeralKeyAgreement.generateEphemeralPublicKey()

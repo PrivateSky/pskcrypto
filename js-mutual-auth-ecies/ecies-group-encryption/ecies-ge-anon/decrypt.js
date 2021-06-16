@@ -22,9 +22,6 @@ module.exports.decrypt = function (receiverECDHKeyPair, encEnvelope, options) {
 
     checkEncryptedEnvelopeMandatoryProperties(encEnvelope)
     common.checkKeyPairMandatoryProperties(receiverECDHKeyPair)
-    receiverECDHKeyPair.privateKey = common.convertKeysToKeyObjects(receiverECDHKeyPair.privateKey, "private");
-    receiverECDHKeyPair.publicKey = common.convertKeysToKeyObjects(receiverECDHKeyPair.publicKey, "public");
-
     const receiverECIESInstancesBuffer = $$.Buffer.from(encEnvelope.recvs, options.encodingFormat)
 
     const keyBuffer = utils.receiverMultiRecipientECIESDecrypt(receiverECDHKeyPair, receiverECIESInstancesBuffer)

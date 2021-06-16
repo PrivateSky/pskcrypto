@@ -22,8 +22,6 @@ module.exports.decrypt = function (receiverECDHKeyPair, encEnvelope, options) {
 
     checkEncryptedEnvelopeMandatoryProperties(encEnvelope)
     common.checkKeyPairMandatoryProperties(receiverECDHKeyPair)
-    receiverECDHKeyPair.privateKey = common.convertKeysToKeyObjects(receiverECDHKeyPair.privateKey, "private");
-    receiverECDHKeyPair.publicKey = common.convertKeysToKeyObjects(receiverECDHKeyPair.publicKey, "public");
 
     let tempGEAnonEnvelope = Object.assign({}, encEnvelope)
     delete tempGEAnonEnvelope.from_ecsig;

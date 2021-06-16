@@ -29,10 +29,6 @@ module.exports.encrypt = function (senderECDHKeyPair, receiverECDHPublicKey, mes
         throw new Error('Input message has to be of type Buffer');
     }
     common.checkKeyPairMandatoryProperties(senderECDHKeyPair)
-    senderECDHKeyPair.privateKey = common.convertKeysToKeyObjects(senderECDHKeyPair.privateKey, "private");
-    senderECDHKeyPair.publicKey = common.convertKeysToKeyObjects(senderECDHKeyPair.publicKey, "public");
-    receiverECDHPublicKey = common.convertKeysToKeyObjects(receiverECDHPublicKey, "public");
-
     const senderKeyAgreement = new mycrypto.ECEphemeralKeyAgreement(options)
     const senderDerivedSharedSecret = senderKeyAgreement.computeSharedSecretFromKeyPair(senderECDHKeyPair.privateKey, receiverECDHPublicKey)
 

@@ -21,11 +21,10 @@ function PublicKeyDeserializer() {
         options = defaultOpts;
 
         let encodingFormat = options.encodingFormat;
-        return crypto.createPublicKey({
-            key: $$.Buffer.from(ecSigVerPublicKeySerialized, encodingFormat),
-            format: options.publicKeyFormat,
-            type: options.publicKeyType
-        })
+        // let publicKey = $$.Buffer.from(ecSigVerPublicKeySerialized, encodingFormat);
+        const ecKeyGenerator = require("../../lib/ECKeyGenerator").createECKeyGenerator();
+        const publicKey = ecKeyGenerator.convertPublicKey(ecSigVerPublicKeySerialized, {originalFormat: "der", outputFormat: "pem", encodingFormat});
+        return publicKey;
     }
 
 }
