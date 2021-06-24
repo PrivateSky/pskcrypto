@@ -18,7 +18,19 @@ module.exports.decrypt = function (receiverECDHPrivateKey, encEnvelope, options)
     const defaultOpts = config;
     Object.assign(defaultOpts, options);
     options = defaultOpts;
-    common.checkEncryptedEnvelopeMandatoryProperties(encEnvelope)
+    if (typeof encEnvelope === "string") {
+        try{
+            encEnvelope = JSON.parse(encEnvelope);
+        }   catch (e) {
+            throw Error(`Could not parse encEnvelope ${encEnvelope}`);
+        }
+    }
+
+    if (typeof encEnvelope !== "object") {
+        throw Error(`encEnvelope should be an object. Received ${typeof encEnvelope}`);
+    }
+
+    common.checkEncryptedEnvelopeMandatoryProperties(encEnvelope);
     const ephemeralPublicKey = $$.Buffer.from(encEnvelope.r, options.encodingFormat)
 
     const ephemeralKeyAgreement = new mycrypto.ECEphemeralKeyAgreement(options)
