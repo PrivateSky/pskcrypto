@@ -30,7 +30,7 @@ console.log("Recipient ECDH key pairs generated!")
 // Start with encryptions
 var startTime = process.hrtime();
 let encEnvelope;
-for (i = 0 ; i < iterations ; ++i) {
+for (let i = 0 ; i < iterations ; ++i) {
     encEnvelope = ecies.encrypt(randomMessage, ...receiverECDHPublicKeyArray)
 }
 var totalHRTime = process.hrtime(startTime);
@@ -38,7 +38,7 @@ var averageEncTimeSecs = ((totalHRTime[0]* NS_PER_SEC + totalHRTime[1]) / NS_PER
 
 // Do decryptions now
 startTime = process.hrtime();
-for (i = 0 ; i < iterations ; ++i) {
+for (let i = 0 ; i < iterations ; ++i) {
     ecies.decrypt(lastReceiverECDHKeyPair, encEnvelope)
 }
 totalHRTime = process.hrtime(startTime);

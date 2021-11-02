@@ -19,7 +19,7 @@ let bobECDHPrivateKey = bobECDH.getPrivateKey();
 
 // Start with encyptions
 var startTime = process.hrtime();
-for (i = 0 ; i < msgNo ; ++i) {
+for (let i = 0 ; i < msgNo ; ++i) {
     encArray[i] = ecies.encrypt(bobECDHPublicKey, msgArray[i])
 }
 var totalHRTime = process.hrtime(startTime);
@@ -27,7 +27,7 @@ var encTimeSecs = (totalHRTime[0]* NS_PER_SEC + totalHRTime[1]) / NS_PER_SEC
 
 // Do decryptions now
 startTime = process.hrtime();
-for (i = 0 ; i < msgNo ; ++i) {
+for (let i = 0 ; i < msgNo ; ++i) {
     ecies.decrypt(bobECDHPrivateKey, encArray[i])
 }
 totalHRTime = process.hrtime(startTime);

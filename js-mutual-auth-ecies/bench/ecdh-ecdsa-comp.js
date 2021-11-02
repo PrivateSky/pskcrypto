@@ -21,7 +21,7 @@ let bobECDH = crypto.createECDH(config.curveName)
 let bobECDHPublicKey = bobECDH.generateKeys();
 
 var startTime = process.hrtime();
-for (i = 0 ; i < iterations ; ++i) {
+for (let i = 0 ; i < iterations ; ++i) {
     let ephemeralKA = new mycrypto.ECEphemeralKeyAgreement()
     ephemeralKA.computeSharedSecretFromKeyPair(aliceECDHPrivateKey, bobECDHPublicKey)
 }
@@ -29,7 +29,7 @@ var totalHRTime = process.hrtime(startTime);
 var ecdhTimeSecs = (totalHRTime[0]* NS_PER_SEC + totalHRTime[1]) / NS_PER_SEC
 
 var startTime = process.hrtime();
-for (i = 0 ; i < iterations ; ++i) {
+for (let i = 0 ; i < iterations ; ++i) {
     mycrypto.computeDigitalSignature(aliceECSigningKeyPair.privateKey, message, config)
 }
 var totalHRTime = process.hrtime(startTime);
